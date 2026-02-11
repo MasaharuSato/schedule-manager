@@ -36,24 +36,11 @@ export function usePlans() {
     return plans.find((p) => p.date === getTodayString());
   }, [plans]);
 
-  /**
-   * 選択したタスクから日別プランを作成・更新
-   * 戻り値: プランに新たに追加された one-off タスクのID一覧（プールから消す用）
-   */
+  /** 選択したタスクから日別プランを作成・更新 */
   const saveDayPlan = useCallback(
-    (date: string, selectedTasks: Task[]): string[] => {
-      let newOneOffIds: string[] = [];
-
+    (date: string, selectedTasks: Task[]): void => {
       setPlans((prev) => {
         const existing = prev.find((p) => p.date === date);
-        const existingTaskIds = new Set(
-          existing?.entries.map((e) => e.taskId) ?? []
-        );
-
-        // 新たに追加された one-off を検出
-        newOneOffIds = selectedTasks
-          .filter((t) => t.type === "one-off" && !existingTaskIds.has(t.id))
-          .map((t) => t.id);
 
         const entries: DayTaskEntry[] = selectedTasks.map((t) => {
           const prevEntry = existing?.entries.find((e) => e.taskId === t.id);
@@ -77,8 +64,6 @@ export function usePlans() {
         }
         return [plan, ...prev];
       });
-
-      return newOneOffIds;
     },
     []
   );

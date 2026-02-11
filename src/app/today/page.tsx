@@ -47,9 +47,20 @@ export default function PlanPage() {
   const handleSavePlan = () => {
     const selected = tasks.filter((t) => selectedIds.has(t.id));
     if (selected.length === 0) return;
-    const oneOffIds = saveDayPlan(selectedDate, selected);
-    if (oneOffIds.length > 0) {
-      deleteTasks(oneOffIds);
+
+    // One-Off タスクのIDを先に計算（既存プランに含まれていないもの）
+    const existingPlan = getPlan(selectedDate);
+    const existingTaskIds = new Set(
+      existingPlan?.entries.map((e) => e.taskId) ?? []
+    );
+    const oneOffToRemove = selected
+      .filter((t) => t.type === "one-off" && !existingTaskIds.has(t.id))
+      .map((t) => t.id);
+
+    saveDayPlan(selectedDate, selected);
+
+    if (oneOffToRemove.length > 0) {
+      deleteTasks(oneOffToRemove);
     }
     setMode("view");
   };
