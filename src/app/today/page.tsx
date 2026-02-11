@@ -13,6 +13,7 @@ export default function PlanPage() {
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [notes, setNotes] = useState<Map<string, string>>(new Map());
+  const [detailOpenId, setDetailOpenId] = useState<string | null>(null);
   const [step, setStep] = useState<"date" | "select" | "view">("date");
 
   const plan = getPlan(selectedDate);
@@ -160,6 +161,7 @@ export default function PlanPage() {
                 setStep("date");
                 setSelectedIds(new Set());
                 setNotes(new Map());
+                setDetailOpenId(null);
               }}
               className="rounded-lg p-1 text-text-secondary"
               aria-label="戻る"
@@ -186,27 +188,43 @@ export default function PlanPage() {
           <div className="flex flex-col gap-2 px-4 py-3">
             {tasks.map((task) => {
               const isSelected = selectedIds.has(task.id);
+              const isDetailOpen = detailOpenId === task.id;
+              const noteText = notes.get(task.id) ?? "";
               return (
                 <div key={task.id} className="flex flex-col">
-                  <button
-                    onClick={() => toggleSelect(task.id)}
-                    className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left shadow-md shadow-black/25 border-l-[3px]"
+                  <div
+                    className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 shadow-md shadow-black/25 border-l-[3px]"
                     style={{ borderLeftColor: getTaskColor(task.id) }}
                   >
-                    <div
-                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
-                        isSelected
-                          ? "border-amber bg-amber"
-                          : "border-text-secondary/40"
-                      }`}
+                    <button
+                      onClick={() => toggleSelect(task.id)}
+                      className="flex h-6 w-6 shrink-0 items-center justify-center"
                     >
-                      {isSelected && (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
+                      <div
+                        className={`flex h-6 w-6 items-center justify-center rounded-md border-2 transition-colors ${
+                          isSelected
+                            ? "border-amber bg-amber"
+                            : "border-text-secondary/40"
+                        }`}
+                      >
+                        {isSelected && (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (!isSelected) {
+                          toggleSelect(task.id);
+                          setDetailOpenId(task.id);
+                        } else {
+                          setDetailOpenId(isDetailOpen ? null : task.id);
+                        }
+                      }}
+                      className="flex-1 min-w-0 text-left"
+                    >
                       <p className="text-base font-bold text-text-primary leading-snug break-words">
                         {task.title}
                       </p>
@@ -226,17 +244,28 @@ export default function PlanPage() {
                           </span>
                         )}
                       </div>
-                    </div>
-                  </button>
-                  {isSelected && (
-                    <div className="ml-10 mr-4 mb-1">
-                      <input
-                        type="text"
-                        value={notes.get(task.id) ?? ""}
+                      {isSelected && !isDetailOpen && noteText && (
+                        <p className="mt-1.5 text-sm text-text-secondary leading-snug break-words whitespace-pre-wrap">{noteText}</p>
+                      )}
+                    </button>
+                  </div>
+                  {isSelected && isDetailOpen && (
+                    <div className="mx-2 rounded-b-xl bg-bg-secondary px-4 py-3 border border-t-0 border-border shadow-inner">
+                      <label className="block text-xs font-medium text-text-secondary mb-1.5">詳細</label>
+                      <textarea
+                        value={noteText}
                         onChange={(e) => updateNote(task.id, e.target.value)}
-                        placeholder="メモを追加..."
-                        className="w-full rounded-lg border border-border bg-bg-secondary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary/50 focus:border-amber focus:outline-none mt-1"
+                        placeholder="詳細を入力..."
+                        rows={4}
+                        className="w-full resize-none rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/50 focus:border-amber focus:outline-none leading-relaxed"
+                        autoFocus
                       />
+                      <button
+                        onClick={() => setDetailOpenId(null)}
+                        className="mt-2 w-full rounded-lg bg-amber/15 py-2 text-sm font-medium text-amber"
+                      >
+                        閉じる
+                      </button>
                     </div>
                   )}
                 </div>
@@ -337,7 +366,7 @@ export default function PlanPage() {
                     )}
                   </div>
                   {entry.note && (
-                    <p className="mt-1.5 text-sm text-text-secondary leading-snug break-words">{entry.note}</p>
+                    <p className="mt-1.5 text-sm text-text-secondary leading-snug break-words whitespace-pre-wrap">{entry.note}</p>
                   )}
                 </div>
               </button>
@@ -381,7 +410,7 @@ export default function PlanPage() {
                         )}
                       </div>
                       {entry.note && (
-                        <p className="mt-1.5 text-sm text-text-secondary/70 line-through leading-snug break-words">{entry.note}</p>
+                        <p className="mt-1.5 text-sm text-text-secondary/70 line-through leading-snug break-words whitespace-pre-wrap">{entry.note}</p>
                       )}
                     </div>
                   </button>
