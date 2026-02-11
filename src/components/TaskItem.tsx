@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Task } from "@/lib/storage";
+import { Task, getTaskColor } from "@/lib/storage";
 
 interface TaskItemProps {
   task: Task;
@@ -26,13 +26,17 @@ export default function TaskItem({
     setIsEditing(false);
   };
 
+  const color = getTaskColor(task.id);
+
   return (
-    <div className="mx-4 my-1.5 flex items-start gap-4 rounded-xl bg-surface px-4 py-4 shadow-md shadow-black/25">
+    <div
+      className="mx-4 my-1.5 flex items-start gap-4 rounded-xl bg-surface px-4 py-4 shadow-md shadow-black/25 border-l-[3px]"
+      style={{ borderLeftColor: color }}
+    >
       {/* Type indicator */}
       <div
-        className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
-          task.type === "one-off" ? "bg-text-secondary" : "bg-amber"
-        }`}
+        className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full"
+        style={{ backgroundColor: color }}
       />
 
       {/* Content */}

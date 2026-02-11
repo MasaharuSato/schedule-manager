@@ -64,6 +64,30 @@ export function getTodayString(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+// --- Task Colors ---
+const TASK_COLORS = [
+  "#60A5FA", // blue
+  "#F472B6", // pink
+  "#4ADE80", // green
+  "#A78BFA", // purple
+  "#FB923C", // orange
+  "#2DD4BF", // teal
+  "#FACC15", // yellow
+  "#F87171", // red
+  "#818CF8", // indigo
+  "#34D399", // emerald
+  "#E879F9", // fuchsia
+  "#38BDF8", // sky
+];
+
+export function getTaskColor(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  }
+  return TASK_COLORS[Math.abs(hash) % TASK_COLORS.length];
+}
+
 export function formatDateLabel(dateStr: string): string {
   const [y, m, d] = dateStr.split("-");
   const days = ["日", "月", "火", "水", "木", "金", "土"];
