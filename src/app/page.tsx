@@ -5,8 +5,7 @@ import TaskForm from "@/components/TaskForm";
 import TaskItem from "@/components/TaskItem";
 
 export default function TaskListPage() {
-  const { tasks, loaded, addTask, deleteTask, updateTask, toggleToday } =
-    useTasks();
+  const { tasks, loaded, addTask, deleteTask, updateTask } = useTasks();
 
   if (!loaded) {
     return (
@@ -21,11 +20,7 @@ export default function TaskListPage() {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border bg-surface px-4 py-3">
         <h1 className="text-lg font-bold text-text-primary">タスク一覧</h1>
-        <p className="text-xs text-text-secondary">
-          {tasks.length}件のタスク
-          {tasks.filter((t) => t.isToday).length > 0 &&
-            ` · ${tasks.filter((t) => t.isToday).length}件が予定に追加済み`}
-        </p>
+        <p className="text-xs text-text-secondary">{tasks.length}件のタスク</p>
       </header>
 
       {/* Add form */}
@@ -60,7 +55,6 @@ export default function TaskListPage() {
             <TaskItem
               key={task.id}
               task={task}
-              onToggleToday={toggleToday}
               onDelete={deleteTask}
               onUpdate={updateTask}
             />

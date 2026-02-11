@@ -23,8 +23,6 @@ export function useTasks() {
       id: crypto.randomUUID(),
       title,
       category: category || undefined,
-      isToday: false,
-      isDone: false,
       createdAt: new Date().toISOString(),
     };
     setTasks((prev) => [newTask, ...prev]);
@@ -40,37 +38,11 @@ export function useTasks() {
     );
   }, []);
 
-  const toggleToday = useCallback((id: string) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, isToday: !t.isToday, isDone: false } : t
-      )
-    );
-  }, []);
-
-  const toggleDone = useCallback((id: string) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, isDone: !t.isDone } : t))
-    );
-  }, []);
-
-  const resetToday = useCallback(() => {
-    setTasks((prev) =>
-      prev.map((t) => ({ ...t, isToday: false, isDone: false }))
-    );
-  }, []);
-
-  const todayTasks = tasks.filter((t) => t.isToday);
-
   return {
     tasks,
-    todayTasks,
     loaded,
     addTask,
     deleteTask,
     updateTask,
-    toggleToday,
-    toggleDone,
-    resetToday,
   };
 }

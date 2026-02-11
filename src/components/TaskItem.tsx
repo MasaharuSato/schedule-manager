@@ -5,14 +5,12 @@ import { Task } from "@/lib/storage";
 
 interface TaskItemProps {
   task: Task;
-  onToggleToday: (id: string) => void;
   onDelete: (id: string) => void;
   onUpdate: (id: string, updates: Partial<Task>) => void;
 }
 
 export default function TaskItem({
   task,
-  onToggleToday,
   onDelete,
   onUpdate,
 }: TaskItemProps) {
@@ -30,31 +28,8 @@ export default function TaskItem({
 
   return (
     <div className="flex items-start gap-3 border-b border-border px-4 py-3">
-      {/* Today toggle */}
-      <button
-        onClick={() => onToggleToday(task.id)}
-        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-          task.isToday
-            ? "border-amber bg-amber"
-            : "border-text-secondary/40"
-        }`}
-        aria-label={task.isToday ? "予定から外す" : "予定に入れる"}
-      >
-        {task.isToday && (
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        )}
-      </button>
+      {/* Bullet */}
+      <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-amber" />
 
       {/* Content */}
       <div className="flex-1 min-w-0">
@@ -68,7 +43,7 @@ export default function TaskItem({
                 if (e.key === "Enter") handleSave();
                 if (e.key === "Escape") setIsEditing(false);
               }}
-              className="flex-1 rounded-md border border-border bg-bg-secondary px-2 py-1 text-sm focus:border-amber focus:outline-none"
+              className="flex-1 rounded-md border border-border bg-bg-secondary px-2 py-1 text-sm text-text-primary focus:border-amber focus:outline-none"
               autoFocus
             />
             <button
