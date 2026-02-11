@@ -215,14 +215,7 @@ export default function PlanPage() {
                       </div>
                     </button>
                     <button
-                      onClick={() => {
-                        if (!isSelected) {
-                          toggleSelect(task.id);
-                          setDetailOpenId(task.id);
-                        } else {
-                          setDetailOpenId(isDetailOpen ? null : task.id);
-                        }
-                      }}
+                      onClick={() => toggleSelect(task.id)}
                       className="flex-1 min-w-0 text-left"
                     >
                       <p className="text-base font-bold text-text-primary leading-snug break-words">
@@ -248,6 +241,14 @@ export default function PlanPage() {
                         <p className="mt-1.5 text-sm text-text-secondary leading-snug break-words whitespace-pre-wrap">{noteText}</p>
                       )}
                     </button>
+                    {isSelected && !isDetailOpen && (
+                      <button
+                        onClick={() => setDetailOpenId(task.id)}
+                        className="shrink-0 rounded-lg bg-bg-secondary px-3 py-1.5 text-xs text-text-secondary"
+                      >
+                        {noteText ? "詳細を編集" : "詳細を入力"}
+                      </button>
+                    )}
                   </div>
                   {isSelected && isDetailOpen && (
                     <div className="mx-2 rounded-b-xl bg-bg-secondary px-4 py-3 border border-t-0 border-border shadow-inner">
