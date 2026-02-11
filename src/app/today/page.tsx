@@ -25,7 +25,7 @@ export default function TodayPage() {
       <header className="sticky top-0 z-40 border-b border-border bg-surface px-4 py-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold text-text-primary">今日の予定</h1>
+            <h1 className="text-lg font-bold text-text-primary">予定を組む</h1>
             <p className="text-xs text-text-secondary">
               {totalCount > 0
                 ? `${doneCount}/${totalCount}件 完了`
@@ -95,8 +95,8 @@ export default function TodayPage() {
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 16 14" />
             </svg>
-            <p className="text-sm">今日の予定はありません</p>
-            <p className="text-xs">タスク一覧から「今日やる」を選択してください</p>
+            <p className="text-sm">予定がありません</p>
+            <p className="text-xs">タスク一覧から予定に入れるタスクを選択してください</p>
           </div>
         ) : (
           <>

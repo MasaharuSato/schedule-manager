@@ -24,7 +24,7 @@ export default function TaskListPage() {
         <p className="text-xs text-text-secondary">
           {tasks.length}件のタスク
           {tasks.filter((t) => t.isToday).length > 0 &&
-            ` · ${tasks.filter((t) => t.isToday).length}件が今日の予定`}
+            ` · ${tasks.filter((t) => t.isToday).length}件が予定に追加済み`}
         </p>
       </header>
 

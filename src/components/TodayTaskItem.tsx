@@ -19,7 +19,7 @@ export default function TodayTaskItem({ task, onToggleDone }: TodayTaskItemProps
         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
           task.isDone
             ? "border-amber bg-amber"
-            : "border-gray-300"
+            : "border-text-secondary/40"
         }`}
         aria-label={task.isDone ? "未完了に戻す" : "完了にする"}
       >

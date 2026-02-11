@@ -36,9 +36,9 @@ export default function TaskItem({
         className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
           task.isToday
             ? "border-amber bg-amber"
-            : "border-gray-300"
+            : "border-text-secondary/40"
         }`}
-        aria-label={task.isToday ? "今日の予定から外す" : "今日やる"}
+        aria-label={task.isToday ? "予定から外す" : "予定に入れる"}
       >
         {task.isToday && (
           <svg
@@ -119,7 +119,7 @@ export default function TaskItem({
           {showConfirm ? (
             <button
               onClick={() => onDelete(task.id)}
-              className="rounded px-1.5 py-0.5 text-[10px] font-medium text-red-500 border border-red-300"
+              className="rounded px-1.5 py-0.5 text-[10px] font-medium text-red-400 border border-red-400/40"
             >
               削除
             </button>

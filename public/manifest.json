@@ -4,8 +4,8 @@
   "description": "タスク管理・1日のスケジュール作成ツール",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FB3000",
+  "background_color": "#121212",
+  "theme_color": "#C8920A",
   "orientation": "portrait",
   "icons": [
     {

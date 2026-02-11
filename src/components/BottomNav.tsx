@@ -56,7 +56,7 @@ export default function BottomNav() {
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
-          今日の予定
+          予定を組む
         </Link>
       </div>
     </nav>
