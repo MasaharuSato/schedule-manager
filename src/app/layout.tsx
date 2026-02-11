@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import { Noto_Serif_JP } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
+
+const notoSerifJP = Noto_Serif_JP({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -28,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className="antialiased">
+      <body className={`antialiased ${notoSerifJP.className}`}>
         <main className="mx-auto min-h-dvh max-w-md safe-bottom">
           {children}
         </main>

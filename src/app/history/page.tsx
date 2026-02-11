@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePlans } from "@/hooks/usePlans";
-import { formatDateLabel, getTodayString } from "@/lib/storage";
+import { formatDateLabel, getTodayString, getTaskColor } from "@/lib/storage";
 
 export default function HistoryPage() {
   const { plans, loaded, deletePlan, toggleDone } = usePlans();
@@ -75,7 +75,8 @@ export default function HistoryPage() {
               <button
                 key={entry.taskId}
                 onClick={() => toggleDone(selectedDate, entry.taskId)}
-                className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left shadow-md shadow-black/25"
+                className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left shadow-md shadow-black/25 border-l-[3px]"
+                style={{ borderLeftColor: getTaskColor(entry.taskId) }}
               >
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-text-secondary/40 transition-colors" />
                 <div className="flex-1 min-w-0">
@@ -114,7 +115,8 @@ export default function HistoryPage() {
                   <button
                     key={entry.taskId}
                     onClick={() => toggleDone(selectedDate, entry.taskId)}
-                    className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left opacity-50 shadow-md shadow-black/25"
+                    className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left opacity-50 shadow-md shadow-black/25 border-l-[3px]"
+                    style={{ borderLeftColor: getTaskColor(entry.taskId) }}
                   >
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-amber bg-amber transition-colors">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
