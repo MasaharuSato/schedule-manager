@@ -10,7 +10,7 @@ export default function TaskListPage() {
   if (!loaded) {
     return (
       <div className="flex h-dvh items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-amber border-t-transparent" />
       </div>
     );
   }
@@ -18,9 +18,9 @@ export default function TaskListPage() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border bg-surface px-4 py-3">
-        <h1 className="text-lg font-bold text-text-primary">タスク一覧</h1>
-        <p className="text-xs text-text-secondary">{tasks.length}件のタスク</p>
+      <header className="sticky top-0 z-40 border-b border-border bg-surface px-5 py-4">
+        <h1 className="text-xl font-bold text-text-primary">タスク一覧</h1>
+        <p className="text-sm text-text-secondary mt-0.5">{tasks.length}件のタスク</p>
       </header>
 
       {/* Add form */}
@@ -29,10 +29,10 @@ export default function TaskListPage() {
       {/* Task list */}
       <div className="flex flex-col">
         {tasks.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-16 text-text-secondary">
+          <div className="flex flex-col items-center gap-3 py-20 text-text-secondary">
             <svg
-              width="48"
-              height="48"
+              width="56"
+              height="56"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -47,8 +47,8 @@ export default function TaskListPage() {
               <path d="M13 12h4" />
               <path d="M13 16h4" />
             </svg>
-            <p className="text-sm">タスクがありません</p>
-            <p className="text-xs">上の入力欄からタスクを追加してください</p>
+            <p className="text-base">タスクがありません</p>
+            <p className="text-sm">上の入力欄からタスクを追加してください</p>
           </div>
         ) : (
           tasks.map((task) => (

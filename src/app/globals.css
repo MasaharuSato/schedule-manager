@@ -35,11 +35,12 @@ body {
     "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
+  font-size: 16px;
 }
 
 /* iPhone safe area */
 .safe-bottom {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4rem);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem);
 }
 
 .nav-safe-bottom {

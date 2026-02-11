@@ -27,14 +27,14 @@ export default function TaskItem({
   };
 
   return (
-    <div className="flex items-start gap-3 border-b border-border px-4 py-3">
+    <div className="flex items-start gap-4 border-b border-border px-5 py-4">
       {/* Bullet */}
-      <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-amber" />
+      <div className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-amber" />
 
       {/* Content */}
       <div className="flex-1 min-w-0">
         {isEditing ? (
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <input
               type="text"
               value={editTitle}
@@ -43,23 +43,23 @@ export default function TaskItem({
                 if (e.key === "Enter") handleSave();
                 if (e.key === "Escape") setIsEditing(false);
               }}
-              className="flex-1 rounded-md border border-border bg-bg-secondary px-2 py-1 text-sm text-text-primary focus:border-amber focus:outline-none"
+              className="flex-1 rounded-lg border border-border bg-bg-secondary px-3 py-2 text-base text-text-primary focus:border-amber focus:outline-none"
               autoFocus
             />
             <button
               onClick={handleSave}
-              className="text-xs font-medium text-amber"
+              className="text-sm font-medium text-amber"
             >
               保存
             </button>
           </div>
         ) : (
           <>
-            <p className="text-sm text-text-primary leading-snug break-words">
+            <p className="text-base text-text-primary leading-snug break-words">
               {task.title}
             </p>
             {task.category && (
-              <span className="mt-1 inline-block rounded-full bg-bg-secondary px-2 py-0.5 text-[10px] text-text-secondary">
+              <span className="mt-1.5 inline-block rounded-full bg-bg-secondary px-3 py-1 text-xs text-text-secondary">
                 {task.category}
               </span>
             )}
@@ -69,18 +69,18 @@ export default function TaskItem({
 
       {/* Actions */}
       {!isEditing && (
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             onClick={() => {
               setEditTitle(task.title);
               setIsEditing(true);
             }}
-            className="rounded p-1.5 text-text-secondary hover:text-text-primary"
+            className="rounded-lg p-2.5 text-text-secondary hover:text-text-primary"
             aria-label="編集"
           >
             <svg
-              width="14"
-              height="14"
+              width="18"
+              height="18"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -94,7 +94,7 @@ export default function TaskItem({
           {showConfirm ? (
             <button
               onClick={() => onDelete(task.id)}
-              className="rounded px-1.5 py-0.5 text-[10px] font-medium text-red-400 border border-red-400/40"
+              className="rounded-lg px-3 py-1.5 text-xs font-medium text-red-400 border border-red-400/40"
             >
               削除
             </button>
@@ -102,12 +102,12 @@ export default function TaskItem({
             <button
               onClick={() => setShowConfirm(true)}
               onBlur={() => setTimeout(() => setShowConfirm(false), 200)}
-              className="rounded p-1.5 text-text-secondary hover:text-red-500"
+              className="rounded-lg p-2.5 text-text-secondary hover:text-red-500"
               aria-label="削除"
             >
               <svg
-                width="14"
-                height="14"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"

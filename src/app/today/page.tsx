@@ -16,7 +16,6 @@ export default function PlanPage() {
 
   const plan = getPlan(selectedDate);
 
-  // プランが既にある場合は表示モード、選択済みIDを復元
   useEffect(() => {
     if (!plansLoaded) return;
     if (plan) {
@@ -31,7 +30,7 @@ export default function PlanPage() {
   if (!tasksLoaded || !plansLoaded) {
     return (
       <div className="flex h-dvh items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-amber border-t-transparent" />
       </div>
     );
   }
@@ -62,11 +61,11 @@ export default function PlanPage() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border bg-surface px-4 py-3">
+      <header className="sticky top-0 z-40 border-b border-border bg-surface px-5 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold text-text-primary">予定を組む</h1>
-            <p className="text-xs text-text-secondary">
+            <h1 className="text-xl font-bold text-text-primary">予定を組む</h1>
+            <p className="text-sm text-text-secondary mt-0.5">
               {formatDateLabel(selectedDate)}
               {mode === "view" && totalCount > 0 && ` · ${doneCount}/${totalCount}件完了`}
             </p>
@@ -74,7 +73,7 @@ export default function PlanPage() {
           {mode === "view" && plan && (
             <button
               onClick={handleEdit}
-              className="rounded-md border border-border px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary"
+              className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:text-text-primary"
             >
               編集
             </button>
@@ -82,17 +81,17 @@ export default function PlanPage() {
         </div>
 
         {/* Date selector */}
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-3 flex items-center gap-3">
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="flex-1 rounded-md border border-border bg-bg-secondary px-2 py-1.5 text-xs text-text-primary focus:border-amber focus:outline-none [color-scheme:dark]"
+            className="flex-1 rounded-lg border border-border bg-bg-secondary px-3 py-2.5 text-sm text-text-primary focus:border-amber focus:outline-none [color-scheme:dark]"
           />
           {selectedDate !== today && (
             <button
               onClick={() => setSelectedDate(today)}
-              className="rounded-md bg-amber/15 px-2.5 py-1.5 text-xs font-medium text-amber"
+              className="rounded-lg bg-amber/15 px-4 py-2.5 text-sm font-medium text-amber"
             >
               今日
             </button>
@@ -101,7 +100,7 @@ export default function PlanPage() {
 
         {/* Progress bar (view mode) */}
         {mode === "view" && totalCount > 0 && (
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-bg-secondary">
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-bg-secondary">
             <div
               className="h-full rounded-full bg-amber transition-all duration-300"
               style={{ width: `${(doneCount / totalCount) * 100}%` }}
@@ -114,13 +113,13 @@ export default function PlanPage() {
       {mode === "select" ? (
         <>
           {/* Task selection list */}
-          <div className="px-4 py-2 text-[10px] font-medium uppercase tracking-wider text-text-secondary bg-bg-secondary">
+          <div className="px-5 py-2.5 text-xs font-medium uppercase tracking-wider text-text-secondary bg-bg-secondary">
             タスクを選択
           </div>
           {tasks.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-16 text-text-secondary">
-              <p className="text-sm">タスクがありません</p>
-              <p className="text-xs">先にタスク一覧でタスクを追加してください</p>
+            <div className="flex flex-col items-center gap-3 py-20 text-text-secondary">
+              <p className="text-base">タスクがありません</p>
+              <p className="text-sm">先にタスク一覧でタスクを追加してください</p>
             </div>
           ) : (
             <div className="flex flex-col">
@@ -128,27 +127,27 @@ export default function PlanPage() {
                 <button
                   key={task.id}
                   onClick={() => toggleSelect(task.id)}
-                  className="flex items-center gap-3 border-b border-border px-4 py-3 text-left"
+                  className="flex items-center gap-4 border-b border-border px-5 py-4 text-left"
                 >
                   <div
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
                       selectedIds.has(task.id)
                         ? "border-amber bg-amber"
                         : "border-text-secondary/40"
                     }`}
                   >
                     {selectedIds.has(task.id) && (
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-text-primary leading-snug break-words">
+                    <p className="text-base text-text-primary leading-snug break-words">
                       {task.title}
                     </p>
                     {task.category && (
-                      <span className="mt-0.5 inline-block rounded-full bg-bg-secondary px-2 py-0.5 text-[10px] text-text-secondary">
+                      <span className="mt-1 inline-block rounded-full bg-bg-secondary px-3 py-1 text-xs text-text-secondary">
                         {task.category}
                       </span>
                     )}
@@ -160,10 +159,10 @@ export default function PlanPage() {
 
           {/* Save button */}
           {selectedIds.size > 0 && (
-            <div className="sticky bottom-16 px-4 py-3">
+            <div className="sticky bottom-20 px-5 py-4">
               <button
                 onClick={handleSavePlan}
-                className="w-full rounded-lg bg-amber py-3 text-sm font-semibold text-white transition-colors hover:bg-amber-dark"
+                className="w-full rounded-xl bg-amber py-4 text-base font-semibold text-white transition-colors hover:bg-amber-dark"
               >
                 {selectedIds.size}件のタスクで予定を確定
               </button>
@@ -172,7 +171,7 @@ export default function PlanPage() {
         </>
       ) : (
         <>
-          {/* View mode - show plan entries with done toggle */}
+          {/* View mode */}
           {plan && plan.entries.length > 0 ? (
             <div className="flex flex-col">
               {/* Undone */}
@@ -182,13 +181,13 @@ export default function PlanPage() {
                   <button
                     key={entry.taskId}
                     onClick={() => toggleDone(selectedDate, entry.taskId)}
-                    className="flex items-center gap-3 border-b border-border px-4 py-3.5 text-left"
+                    className="flex items-center gap-4 border-b border-border px-5 py-4 text-left"
                   >
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 border-text-secondary/40 transition-colors" />
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-text-secondary/40 transition-colors" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-text-primary leading-snug break-words">{entry.title}</p>
+                      <p className="text-base text-text-primary leading-snug break-words">{entry.title}</p>
                       {entry.category && (
-                        <span className="mt-0.5 inline-block rounded-full bg-bg-secondary px-2 py-0.5 text-[10px] text-text-secondary">
+                        <span className="mt-1 inline-block rounded-full bg-bg-secondary px-3 py-1 text-xs text-text-secondary">
                           {entry.category}
                         </span>
                       )}
@@ -198,7 +197,7 @@ export default function PlanPage() {
               {/* Done */}
               {doneCount > 0 && (
                 <>
-                  <div className="px-4 py-2 text-[10px] font-medium uppercase tracking-wider text-text-secondary bg-bg-secondary">
+                  <div className="px-5 py-2.5 text-xs font-medium uppercase tracking-wider text-text-secondary bg-bg-secondary">
                     完了済み
                   </div>
                   {plan.entries
@@ -207,17 +206,17 @@ export default function PlanPage() {
                       <button
                         key={entry.taskId}
                         onClick={() => toggleDone(selectedDate, entry.taskId)}
-                        className="flex items-center gap-3 border-b border-border px-4 py-3.5 text-left opacity-50"
+                        className="flex items-center gap-4 border-b border-border px-5 py-4 text-left opacity-50"
                       >
-                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 border-amber bg-amber transition-colors">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-amber bg-amber transition-colors">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-text-secondary line-through leading-snug break-words">{entry.title}</p>
+                          <p className="text-base text-text-secondary line-through leading-snug break-words">{entry.title}</p>
                           {entry.category && (
-                            <span className="mt-0.5 inline-block rounded-full bg-bg-secondary px-2 py-0.5 text-[10px] text-text-secondary">
+                            <span className="mt-1 inline-block rounded-full bg-bg-secondary px-3 py-1 text-xs text-text-secondary">
                               {entry.category}
                             </span>
                           )}
@@ -228,8 +227,8 @@ export default function PlanPage() {
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2 py-16 text-text-secondary">
-              <p className="text-sm">この日の予定はまだありません</p>
+            <div className="flex flex-col items-center gap-3 py-20 text-text-secondary">
+              <p className="text-base">この日の予定はまだありません</p>
             </div>
           )}
         </>
