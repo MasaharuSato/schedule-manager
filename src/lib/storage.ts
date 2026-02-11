@@ -64,28 +64,11 @@ export function getTodayString(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-// --- Task Colors ---
-const TASK_COLORS = [
-  "#3B6FA0", // steel blue
-  "#8B5A6B", // dusty rose
-  "#4A7C5E", // forest green
-  "#6B5B8A", // muted purple
-  "#A0734A", // burnt sienna
-  "#3D7A7A", // dark teal
-  "#8A7A3B", // olive gold
-  "#8B4A4A", // brick red
-  "#4A5A8B", // slate indigo
-  "#3B7A6B", // deep jade
-  "#7A4A7A", // plum
-  "#4A708B", // cadet blue
-];
+// --- Task Color ---
+const TASK_COLOR = "#8B3A3A"; // deep red
 
-export function getTaskColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash * 31 + id.charCodeAt(i)) | 0;
-  }
-  return TASK_COLORS[Math.abs(hash) % TASK_COLORS.length];
+export function getTaskColor(_id: string): string {
+  return TASK_COLOR;
 }
 
 export function formatDateLabel(dateStr: string): string {
