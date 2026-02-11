@@ -22,7 +22,7 @@ export default function HistoryPage() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border bg-surface px-5 py-4">
+      <header className="sticky top-0 z-40 border-b border-border bg-surface px-5 py-4 shadow-lg shadow-black/30">
         <h1 className="text-xl font-bold text-text-primary">履歴</h1>
         <p className="text-sm text-text-secondary mt-0.5">
           {plans.length > 0
@@ -52,7 +52,7 @@ export default function HistoryPage() {
           <p className="text-sm">「予定を組む」で予定を作成すると表示されます</p>
         </div>
       ) : (
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-3 px-4 py-3">
           {plans.map((plan) => {
             const doneCount = plan.entries.filter((e) => e.isDone).length;
             const totalCount = plan.entries.length;
@@ -60,7 +60,7 @@ export default function HistoryPage() {
             const isToday = plan.date === today;
 
             return (
-              <div key={plan.date} className="border-b border-border">
+              <div key={plan.date} className="rounded-xl bg-surface shadow-md shadow-black/25 overflow-hidden">
                 {/* Day summary row */}
                 <button
                   onClick={() =>
@@ -71,7 +71,7 @@ export default function HistoryPage() {
                   {/* Date */}
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-base font-medium text-text-primary">
+                      <p className="text-base font-bold text-text-primary">
                         {formatDateLabel(plan.date)}
                       </p>
                       {isToday && (
@@ -157,15 +157,33 @@ export default function HistoryPage() {
                             </svg>
                           )}
                         </div>
-                        <p
-                          className={`text-sm break-words ${
-                            entry.isDone
-                              ? "line-through text-text-secondary"
-                              : "text-text-primary"
-                          }`}
-                        >
-                          {entry.title}
-                        </p>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-sm font-bold break-words ${
+                              entry.isDone
+                                ? "line-through text-text-secondary"
+                                : "text-text-primary"
+                            }`}
+                          >
+                            {entry.title}
+                          </p>
+                          <div className="mt-1 flex items-center gap-2">
+                            <span
+                              className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                entry.type === "one-off"
+                                  ? "bg-text-secondary/15 text-text-secondary"
+                                  : "bg-amber/15 text-amber"
+                              }`}
+                            >
+                              {entry.type === "one-off" ? "One-Off" : "Regular"}
+                            </span>
+                            {entry.category && (
+                              <span className="inline-block rounded-full bg-bg-secondary px-2 py-0.5 text-[10px] text-text-secondary">
+                                {entry.category}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </button>
                     ))}
                     {/* Delete plan */}

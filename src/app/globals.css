@@ -40,7 +40,7 @@ body {
 
 /* iPhone safe area */
 .safe-bottom {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
 }
 
 .nav-safe-bottom {

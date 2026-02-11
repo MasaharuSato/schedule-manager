@@ -6,7 +6,7 @@ import { usePlans } from "@/hooks/usePlans";
 import { getTodayString, formatDateLabel } from "@/lib/storage";
 
 export default function PlanPage() {
-  const { tasks, loaded: tasksLoaded } = useTasks();
+  const { tasks, loaded: tasksLoaded, deleteTasks } = useTasks();
   const { getPlan, saveDayPlan, toggleDone, loaded: plansLoaded } = usePlans();
 
   const today = getTodayString();
@@ -47,7 +47,10 @@ export default function PlanPage() {
   const handleSavePlan = () => {
     const selected = tasks.filter((t) => selectedIds.has(t.id));
     if (selected.length === 0) return;
-    saveDayPlan(selectedDate, selected);
+    const oneOffIds = saveDayPlan(selectedDate, selected);
+    if (oneOffIds.length > 0) {
+      deleteTasks(oneOffIds);
+    }
     setMode("view");
   };
 
@@ -61,7 +64,7 @@ export default function PlanPage() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border bg-surface px-5 py-4">
+      <header className="sticky top-0 z-40 border-b border-border bg-surface px-5 py-4 shadow-lg shadow-black/30">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-text-primary">予定を組む</h1>
@@ -122,12 +125,12 @@ export default function PlanPage() {
               <p className="text-sm">先にタスク一覧でタスクを追加してください</p>
             </div>
           ) : (
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-2 px-4 py-3">
               {tasks.map((task) => (
                 <button
                   key={task.id}
                   onClick={() => toggleSelect(task.id)}
-                  className="flex items-center gap-4 border-b border-border px-5 py-4 text-left"
+                  className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left shadow-md shadow-black/25"
                 >
                   <div
                     className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
@@ -143,14 +146,25 @@ export default function PlanPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base text-text-primary leading-snug break-words">
+                    <p className="text-base font-bold text-text-primary leading-snug break-words">
                       {task.title}
                     </p>
-                    {task.category && (
-                      <span className="mt-1 inline-block rounded-full bg-bg-secondary px-3 py-1 text-xs text-text-secondary">
-                        {task.category}
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <span
+                        className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+                          task.type === "one-off"
+                            ? "bg-text-secondary/15 text-text-secondary"
+                            : "bg-amber/15 text-amber"
+                        }`}
+                      >
+                        {task.type === "one-off" ? "One-Off" : "Regular"}
                       </span>
-                    )}
+                      {task.category && (
+                        <span className="inline-block rounded-full bg-bg-secondary px-2.5 py-0.5 text-[11px] text-text-secondary">
+                          {task.category}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </button>
               ))}
@@ -162,7 +176,7 @@ export default function PlanPage() {
             <div className="sticky bottom-20 px-5 py-4">
               <button
                 onClick={handleSavePlan}
-                className="w-full rounded-xl bg-amber py-4 text-base font-semibold text-white transition-colors hover:bg-amber-dark"
+                className="w-full rounded-xl bg-amber py-4 text-base font-semibold text-white transition-colors hover:bg-amber-dark shadow-lg shadow-amber/20"
               >
                 {selectedIds.size}件のタスクで予定を確定
               </button>
@@ -173,7 +187,7 @@ export default function PlanPage() {
         <>
           {/* View mode */}
           {plan && plan.entries.length > 0 ? (
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-2 px-4 py-3">
               {/* Undone */}
               {plan.entries
                 .filter((e) => !e.isDone)
@@ -181,23 +195,34 @@ export default function PlanPage() {
                   <button
                     key={entry.taskId}
                     onClick={() => toggleDone(selectedDate, entry.taskId)}
-                    className="flex items-center gap-4 border-b border-border px-5 py-4 text-left"
+                    className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left shadow-md shadow-black/25"
                   >
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-text-secondary/40 transition-colors" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-base text-text-primary leading-snug break-words">{entry.title}</p>
-                      {entry.category && (
-                        <span className="mt-1 inline-block rounded-full bg-bg-secondary px-3 py-1 text-xs text-text-secondary">
-                          {entry.category}
+                      <p className="text-base font-bold text-text-primary leading-snug break-words">{entry.title}</p>
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <span
+                          className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+                            entry.type === "one-off"
+                              ? "bg-text-secondary/15 text-text-secondary"
+                              : "bg-amber/15 text-amber"
+                          }`}
+                        >
+                          {entry.type === "one-off" ? "One-Off" : "Regular"}
                         </span>
-                      )}
+                        {entry.category && (
+                          <span className="inline-block rounded-full bg-bg-secondary px-2.5 py-0.5 text-[11px] text-text-secondary">
+                            {entry.category}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </button>
                 ))}
               {/* Done */}
               {doneCount > 0 && (
                 <>
-                  <div className="px-5 py-2.5 text-xs font-medium uppercase tracking-wider text-text-secondary bg-bg-secondary">
+                  <div className="px-4 py-2.5 text-xs font-medium uppercase tracking-wider text-text-secondary">
                     完了済み
                   </div>
                   {plan.entries
@@ -206,7 +231,7 @@ export default function PlanPage() {
                       <button
                         key={entry.taskId}
                         onClick={() => toggleDone(selectedDate, entry.taskId)}
-                        className="flex items-center gap-4 border-b border-border px-5 py-4 text-left opacity-50"
+                        className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left opacity-50 shadow-md shadow-black/25"
                       >
                         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-amber bg-amber transition-colors">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -214,12 +239,23 @@ export default function PlanPage() {
                           </svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-base text-text-secondary line-through leading-snug break-words">{entry.title}</p>
-                          {entry.category && (
-                            <span className="mt-1 inline-block rounded-full bg-bg-secondary px-3 py-1 text-xs text-text-secondary">
-                              {entry.category}
+                          <p className="text-base font-bold text-text-secondary line-through leading-snug break-words">{entry.title}</p>
+                          <div className="mt-1.5 flex items-center gap-2">
+                            <span
+                              className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+                                entry.type === "one-off"
+                                  ? "bg-text-secondary/15 text-text-secondary"
+                                  : "bg-amber/15 text-amber"
+                              }`}
+                            >
+                              {entry.type === "one-off" ? "One-Off" : "Regular"}
                             </span>
-                          )}
+                            {entry.category && (
+                              <span className="inline-block rounded-full bg-bg-secondary px-2.5 py-0.5 text-[11px] text-text-secondary">
+                                {entry.category}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </button>
                     ))}

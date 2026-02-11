@@ -1,10 +1,13 @@
 const TASKS_KEY = "schedule-manager-tasks";
 const PLANS_KEY = "schedule-manager-plans";
 
+export type TaskType = "one-off" | "regular";
+
 export interface Task {
   id: string;
   title: string;
   category?: string;
+  type: TaskType;
   createdAt: string;
 }
 
@@ -12,6 +15,7 @@ export interface DayTaskEntry {
   taskId: string;
   title: string;
   category?: string;
+  type: TaskType;
   isDone: boolean;
 }
 
@@ -26,7 +30,9 @@ export function loadTasks(): Task[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(TASKS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : [];
+    // migrate: old tasks without type default to "regular"
+    return parsed.map((t: Task) => ({ ...t, type: t.type || "regular" }));
   } catch {
     return [];
   }

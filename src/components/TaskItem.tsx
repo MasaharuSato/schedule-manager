@@ -27,9 +27,13 @@ export default function TaskItem({
   };
 
   return (
-    <div className="flex items-start gap-4 border-b border-border px-5 py-4">
-      {/* Bullet */}
-      <div className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-amber" />
+    <div className="mx-4 my-1.5 flex items-start gap-4 rounded-xl bg-surface px-4 py-4 shadow-md shadow-black/25">
+      {/* Type indicator */}
+      <div
+        className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
+          task.type === "one-off" ? "bg-text-secondary" : "bg-amber"
+        }`}
+      />
 
       {/* Content */}
       <div className="flex-1 min-w-0">
@@ -55,14 +59,25 @@ export default function TaskItem({
           </div>
         ) : (
           <>
-            <p className="text-base text-text-primary leading-snug break-words">
+            <p className="text-base font-bold text-text-primary leading-snug break-words">
               {task.title}
             </p>
-            {task.category && (
-              <span className="mt-1.5 inline-block rounded-full bg-bg-secondary px-3 py-1 text-xs text-text-secondary">
-                {task.category}
+            <div className="mt-1.5 flex items-center gap-2">
+              <span
+                className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+                  task.type === "one-off"
+                    ? "bg-text-secondary/15 text-text-secondary"
+                    : "bg-amber/15 text-amber"
+                }`}
+              >
+                {task.type === "one-off" ? "One-Off" : "Regular"}
               </span>
-            )}
+              {task.category && (
+                <span className="inline-block rounded-full bg-bg-secondary px-2.5 py-0.5 text-[11px] text-text-secondary">
+                  {task.category}
+                </span>
+              )}
+            </div>
           </>
         )}
       </div>

@@ -18,7 +18,7 @@ export default function TaskListPage() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border bg-surface px-5 py-4">
+      <header className="sticky top-0 z-40 border-b border-border bg-surface px-5 py-4 shadow-lg shadow-black/30">
         <h1 className="text-xl font-bold text-text-primary">タスク一覧</h1>
         <p className="text-sm text-text-secondary mt-0.5">{tasks.length}件のタスク</p>
       </header>
