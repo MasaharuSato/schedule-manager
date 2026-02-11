@@ -12,6 +12,7 @@ export default function PlanPage() {
   const today = getTodayString();
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [notes, setNotes] = useState<Map<string, string>>(new Map());
   const [step, setStep] = useState<"date" | "select" | "view">("date");
 
   const plan = getPlan(selectedDate);
@@ -21,8 +22,12 @@ export default function PlanPage() {
     if (step === "select" && plansLoaded) {
       if (plan) {
         setSelectedIds(new Set(plan.entries.map((e) => e.taskId)));
+        setNotes(new Map(
+          plan.entries.filter((e) => e.note).map((e) => [e.taskId, e.note!])
+        ));
       } else {
         setSelectedIds(new Set());
+        setNotes(new Map());
       }
     }
   }, [step, plansLoaded, plan]);
@@ -44,6 +49,14 @@ export default function PlanPage() {
     });
   };
 
+  const updateNote = (id: string, value: string) => {
+    setNotes((prev) => {
+      const next = new Map(prev);
+      next.set(id, value);
+      return next;
+    });
+  };
+
   const handleSavePlan = () => {
     const selected = tasks.filter((t) => selectedIds.has(t.id));
     if (selected.length === 0) return;
@@ -56,7 +69,7 @@ export default function PlanPage() {
       .filter((t) => t.type === "one-off" && !existingTaskIds.has(t.id))
       .map((t) => t.id);
 
-    saveDayPlan(selectedDate, selected);
+    saveDayPlan(selectedDate, selected, notes);
 
     if (oneOffToRemove.length > 0) {
       deleteTasks(oneOffToRemove);
@@ -146,6 +159,7 @@ export default function PlanPage() {
               onClick={() => {
                 setStep("date");
                 setSelectedIds(new Set());
+                setNotes(new Map());
               }}
               className="rounded-lg p-1 text-text-secondary"
               aria-label="戻る"
@@ -170,49 +184,64 @@ export default function PlanPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-2 px-4 py-3">
-            {tasks.map((task) => (
-              <button
-                key={task.id}
-                onClick={() => toggleSelect(task.id)}
-                className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left shadow-md shadow-black/25 border-l-[3px]"
-                style={{ borderLeftColor: getTaskColor(task.id) }}
-              >
-                <div
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
-                    selectedIds.has(task.id)
-                      ? "border-amber bg-amber"
-                      : "border-text-secondary/40"
-                  }`}
-                >
-                  {selectedIds.has(task.id) && (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-base font-bold text-text-primary leading-snug break-words">
-                    {task.title}
-                  </p>
-                  <div className="mt-1.5 flex items-center gap-2">
-                    <span
-                      className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                        task.type === "one-off"
-                          ? "bg-text-secondary/15 text-text-secondary"
-                          : "bg-amber/15 text-amber"
+            {tasks.map((task) => {
+              const isSelected = selectedIds.has(task.id);
+              return (
+                <div key={task.id} className="flex flex-col">
+                  <button
+                    onClick={() => toggleSelect(task.id)}
+                    className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left shadow-md shadow-black/25 border-l-[3px]"
+                    style={{ borderLeftColor: getTaskColor(task.id) }}
+                  >
+                    <div
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+                        isSelected
+                          ? "border-amber bg-amber"
+                          : "border-text-secondary/40"
                       }`}
                     >
-                      {task.type === "one-off" ? "One-Off" : "Regular"}
-                    </span>
-                    {task.category && (
-                      <span className="inline-block rounded-full bg-bg-secondary px-2.5 py-0.5 text-[11px] text-text-secondary">
-                        {task.category}
-                      </span>
-                    )}
-                  </div>
+                      {isSelected && (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-base font-bold text-text-primary leading-snug break-words">
+                        {task.title}
+                      </p>
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <span
+                          className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+                            task.type === "one-off"
+                              ? "bg-text-secondary/15 text-text-secondary"
+                              : "bg-amber/15 text-amber"
+                          }`}
+                        >
+                          {task.type === "one-off" ? "One-Off" : "Regular"}
+                        </span>
+                        {task.category && (
+                          <span className="inline-block rounded-full bg-bg-secondary px-2.5 py-0.5 text-[11px] text-text-secondary">
+                            {task.category}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                  {isSelected && (
+                    <div className="ml-10 mr-4 mb-1">
+                      <input
+                        type="text"
+                        value={notes.get(task.id) ?? ""}
+                        onChange={(e) => updateNote(task.id, e.target.value)}
+                        placeholder="メモを追加..."
+                        className="w-full rounded-lg border border-border bg-bg-secondary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary/50 focus:border-amber focus:outline-none mt-1"
+                      />
+                    </div>
+                  )}
                 </div>
-              </button>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -307,6 +336,9 @@ export default function PlanPage() {
                       </span>
                     )}
                   </div>
+                  {entry.note && (
+                    <p className="mt-1.5 text-sm text-text-secondary leading-snug break-words">{entry.note}</p>
+                  )}
                 </div>
               </button>
             ))}
@@ -348,6 +380,9 @@ export default function PlanPage() {
                           </span>
                         )}
                       </div>
+                      {entry.note && (
+                        <p className="mt-1.5 text-sm text-text-secondary/70 line-through leading-snug break-words">{entry.note}</p>
+                      )}
                     </div>
                   </button>
                 ))}

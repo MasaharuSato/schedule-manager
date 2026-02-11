@@ -17,6 +17,7 @@ export interface DayTaskEntry {
   category?: string;
   type: TaskType;
   isDone: boolean;
+  note?: string;
 }
 
 export interface DayPlan {

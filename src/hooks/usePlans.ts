@@ -38,18 +38,20 @@ export function usePlans() {
 
   /** 選択したタスクから日別プランを作成・更新 */
   const saveDayPlan = useCallback(
-    (date: string, selectedTasks: Task[]): void => {
+    (date: string, selectedTasks: Task[], notes?: Map<string, string>): void => {
       setPlans((prev) => {
         const existing = prev.find((p) => p.date === date);
 
         const entries: DayTaskEntry[] = selectedTasks.map((t) => {
           const prevEntry = existing?.entries.find((e) => e.taskId === t.id);
+          const noteValue = notes?.get(t.id);
           return {
             taskId: t.id,
             title: t.title,
             category: t.category,
             type: t.type,
             isDone: prevEntry?.isDone ?? false,
+            note: noteValue !== undefined ? noteValue : prevEntry?.note,
           };
         });
 

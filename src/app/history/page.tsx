@@ -99,6 +99,9 @@ export default function HistoryPage() {
                       </span>
                     )}
                   </div>
+                  {entry.note && (
+                    <p className="mt-1.5 text-sm text-text-secondary leading-snug break-words">{entry.note}</p>
+                  )}
                 </div>
               </button>
             ))}
@@ -143,6 +146,9 @@ export default function HistoryPage() {
                           </span>
                         )}
                       </div>
+                      {entry.note && (
+                        <p className="mt-1.5 text-sm text-text-secondary/70 line-through leading-snug break-words">{entry.note}</p>
+                      )}
                     </div>
                   </button>
                 ))}
