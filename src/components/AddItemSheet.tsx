@@ -89,7 +89,7 @@ export default function AddItemSheet({
   return (
     <BottomSheet isOpen={isOpen} onClose={handleClose} title="追加">
       {/* Mode selector */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-5">
         {(["task", "category", "group"] as const).map((m) => (
           <button
             key={m}
@@ -97,7 +97,7 @@ export default function AddItemSheet({
               setMode(m);
               setName("");
             }}
-            className={`flex-1 rounded-2xl py-3.5 text-base font-medium transition-colors ${
+            className={`flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors ${
               mode === m
                 ? "bg-amber text-white"
                 : "bg-surface-highlight text-text-secondary"
@@ -112,36 +112,27 @@ export default function AddItemSheet({
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* Name input */}
-        <div>
-          <label className="block text-sm font-medium text-text-secondary mb-2">
-            {mode === "category"
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={
+            mode === "category"
               ? "カテゴリ名"
               : mode === "group"
               ? "グループ名"
-              : "タスク名"}
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={
-              mode === "category"
-                ? "例: 健康、仕事、趣味..."
-                : mode === "group"
-                ? "例: 運動、食事、読書..."
-                : "例: ジョギング、レポート作成..."
-            }
-            className="w-full rounded-2xl border border-border bg-bg-secondary px-5 py-4 text-lg text-text-primary placeholder:text-text-secondary/40 focus:border-amber focus:outline-none"
-            autoFocus
-          />
-        </div>
+              : "タスク名"
+          }
+          className="w-full rounded-xl border border-border bg-bg-secondary px-4 py-3.5 text-base text-text-primary placeholder:text-text-secondary/50 focus:border-amber focus:outline-none"
+          autoFocus
+        />
 
         {/* Category picker (for group and task modes) */}
         {(mode === "group" || mode === "task") && (
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block text-xs font-medium text-text-secondary mb-1.5">
               カテゴリ
             </label>
             <select
@@ -150,7 +141,7 @@ export default function AddItemSheet({
                 setCategoryId(e.target.value);
                 setGroupId("");
               }}
-              className="w-full rounded-2xl border border-border bg-bg-secondary px-5 py-4 text-base text-text-primary focus:border-amber focus:outline-none [color-scheme:dark]"
+              className="w-full rounded-xl border border-border bg-bg-secondary px-4 py-3 text-base text-text-primary focus:border-amber focus:outline-none [color-scheme:dark]"
             >
               <option value="">未分類</option>
               {categories.map((c) => (
@@ -165,13 +156,13 @@ export default function AddItemSheet({
         {/* Group picker (for task mode only) */}
         {mode === "task" && categoryId && filteredGroups.length > 0 && (
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block text-xs font-medium text-text-secondary mb-1.5">
               グループ
             </label>
             <select
               value={groupId}
               onChange={(e) => setGroupId(e.target.value)}
-              className="w-full rounded-2xl border border-border bg-bg-secondary px-5 py-4 text-base text-text-primary focus:border-amber focus:outline-none [color-scheme:dark]"
+              className="w-full rounded-xl border border-border bg-bg-secondary px-4 py-3 text-base text-text-primary focus:border-amber focus:outline-none [color-scheme:dark]"
             >
               <option value="">グループなし</option>
               {filteredGroups.map((g) => (
@@ -186,14 +177,14 @@ export default function AddItemSheet({
         {/* Task type toggle */}
         {mode === "task" && (
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block text-xs font-medium text-text-secondary mb-1.5">
               タイプ
             </label>
-            <div className="flex rounded-2xl overflow-hidden border border-border">
+            <div className="flex rounded-xl overflow-hidden border border-border">
               <button
                 type="button"
                 onClick={() => setTaskType("regular")}
-                className={`flex-1 py-3.5 text-base font-medium transition-colors ${
+                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
                   taskType === "regular"
                     ? "bg-task-regular text-white"
                     : "bg-bg-secondary text-text-secondary"
@@ -204,7 +195,7 @@ export default function AddItemSheet({
               <button
                 type="button"
                 onClick={() => setTaskType("one-off")}
-                className={`flex-1 py-3.5 text-base font-medium transition-colors ${
+                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
                   taskType === "one-off"
                     ? "bg-task-oneoff text-white"
                     : "bg-bg-secondary text-text-secondary"
@@ -222,7 +213,7 @@ export default function AddItemSheet({
           disabled={
             !name.trim() || (mode === "group" && !categoryId)
           }
-          className="w-full rounded-2xl bg-amber py-4.5 text-lg font-semibold text-white transition-colors hover:bg-amber-dark disabled:opacity-40 mt-3"
+          className="w-full rounded-xl bg-amber py-3.5 text-base font-semibold text-white transition-colors hover:bg-amber-dark disabled:opacity-40 mt-2"
         >
           追加する
         </button>
