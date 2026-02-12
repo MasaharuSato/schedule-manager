@@ -69,7 +69,7 @@ export default function BottomSheet({
       <div
         ref={sheetRef}
         className="relative z-10 w-full max-w-md rounded-t-2xl bg-surface-elevated animate-sheet-up"
-        style={{ maxHeight: "85vh" }}
+        style={{ maxHeight: "92vh" }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -80,12 +80,12 @@ export default function BottomSheet({
         </div>
 
         {title && (
-          <div className="px-5 pb-3 pt-1">
-            <h2 className="text-lg font-bold text-text-primary">{title}</h2>
+          <div className="px-6 pb-4 pt-2">
+            <h2 className="text-xl font-bold text-text-primary">{title}</h2>
           </div>
         )}
 
-        <div className="overflow-y-auto px-5 pb-12 nav-safe-bottom" style={{ maxHeight: "calc(85vh - 4rem)" }}>
+        <div className="overflow-y-auto px-6 pb-14 nav-safe-bottom" style={{ maxHeight: "calc(92vh - 5rem)" }}>
           {children}
         </div>
       </div>
