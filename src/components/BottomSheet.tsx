@@ -58,7 +58,7 @@ export default function BottomSheet({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 animate-fade-in"
@@ -85,7 +85,7 @@ export default function BottomSheet({
           </div>
         )}
 
-        <div className="overflow-y-auto px-5 pb-8" style={{ maxHeight: "calc(85vh - 4rem)" }}>
+        <div className="overflow-y-auto px-5 pb-12 nav-safe-bottom" style={{ maxHeight: "calc(85vh - 4rem)" }}>
           {children}
         </div>
       </div>

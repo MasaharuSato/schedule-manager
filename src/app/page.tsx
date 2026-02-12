@@ -407,7 +407,7 @@ export default function TaskListPage() {
           <p className="text-sm">右上の＋ボタンからタスクを追加してください</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-1 py-3">
+        <div className="flex flex-col gap-1 py-3 pb-8">
           {/* Category sections */}
           {categories.map((cat) =>
             renderCategorySection(cat.id, cat.name)
@@ -460,7 +460,7 @@ export default function TaskListPage() {
           {/* Add category button */}
           <button
             onClick={() => openAdd("category")}
-            className="flex items-center gap-2 mx-4 mt-2 rounded-xl border border-dashed border-border px-4 py-3 text-sm text-text-secondary/60 hover:text-text-secondary hover:border-text-secondary/30 transition-colors"
+            className="flex items-center gap-2 mx-4 mt-2 mb-4 rounded-xl border border-dashed border-border px-4 py-3 text-sm text-text-secondary/60 hover:text-text-secondary hover:border-text-secondary/30 transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" />
