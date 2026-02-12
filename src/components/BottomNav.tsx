@@ -46,20 +46,26 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-surface nav-safe-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border backdrop-blur-xl bg-surface/80 nav-safe-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
       <div className="mx-auto flex max-w-md">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            className={`flex flex-1 flex-col items-center gap-1.5 py-4 text-xs font-medium transition-colors ${
-              pathname === tab.href ? "text-amber" : "text-text-secondary"
-            }`}
-          >
-            {tab.icon}
-            {tab.label}
-          </Link>
-        ))}
+        {tabs.map((tab) => {
+          const isActive = pathname === tab.href;
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={`relative flex flex-1 flex-col items-center gap-1.5 py-4 text-xs font-medium transition-colors ${
+                isActive ? "text-amber" : "text-text-secondary"
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+              {isActive && (
+                <span className="absolute bottom-2 h-1 w-1 rounded-full bg-amber" />
+              )}
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

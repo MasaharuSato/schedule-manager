@@ -1,20 +1,48 @@
 const TASKS_KEY = "schedule-manager-tasks";
 const PLANS_KEY = "schedule-manager-plans";
+const CATEGORIES_KEY = "schedule-manager-categories";
 
 export type TaskType = "one-off" | "regular";
 
+// --- Category / Group ---
+export interface Category {
+  id: string;
+  name: string;
+  order: number;
+  createdAt: string;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  categoryId: string;
+  order: number;
+  createdAt: string;
+}
+
+export interface CategoryStore {
+  categories: Category[];
+  groups: Group[];
+}
+
+// --- Task ---
 export interface Task {
   id: string;
   title: string;
-  category?: string;
+  categoryId?: string;
+  groupId?: string;
   type: TaskType;
   createdAt: string;
 }
 
+// --- Day Plan ---
 export interface DayTaskEntry {
   taskId: string;
   title: string;
-  category?: string;
+  categoryId?: string;
+  categoryName?: string;
+  groupId?: string;
+  groupName?: string;
   type: TaskType;
   isDone: boolean;
   note?: string;
@@ -32,8 +60,10 @@ export function loadTasks(): Task[] {
   try {
     const raw = localStorage.getItem(TASKS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
-    // migrate: old tasks without type default to "regular"
-    return parsed.map((t: Task) => ({ ...t, type: t.type || "regular" }));
+    return parsed.map((t: Record<string, unknown>) => ({
+      ...t,
+      type: t.type || "regular",
+    }));
   } catch {
     return [];
   }
@@ -60,16 +90,34 @@ export function savePlans(plans: DayPlan[]): void {
   localStorage.setItem(PLANS_KEY, JSON.stringify(plans));
 }
 
+// --- Category Store ---
+export function loadCategoryStore(): CategoryStore {
+  if (typeof window === "undefined") return { categories: [], groups: [] };
+  try {
+    const raw = localStorage.getItem(CATEGORIES_KEY);
+    return raw ? JSON.parse(raw) : { categories: [], groups: [] };
+  } catch {
+    return { categories: [], groups: [] };
+  }
+}
+
+export function saveCategoryStore(store: CategoryStore): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(CATEGORIES_KEY, JSON.stringify(store));
+}
+
+// --- Utility ---
 export function getTodayString(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-// --- Task Color ---
-const TASK_COLOR = "#8B3A3A"; // deep red
+export function getTaskColor(type: TaskType): string {
+  return type === "one-off" ? "#3B82F6" : "#DC2626";
+}
 
-export function getTaskColor(_id: string): string {
-  return TASK_COLOR;
+export function getTaskColorMuted(type: TaskType): string {
+  return type === "one-off" ? "#1E3A5F" : "#5C1A1A";
 }
 
 export function formatDateLabel(dateStr: string): string {

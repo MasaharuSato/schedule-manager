@@ -1,18 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { usePlans } from "@/hooks/usePlans";
-import { formatDateLabel, getTodayString, getTaskColor } from "@/lib/storage";
+import { useEdgeSwipeBack } from "@/hooks/useEdgeSwipeBack";
+import { formatDateLabel, getTodayString, getTaskColor, getTaskColorMuted } from "@/lib/storage";
 
 export default function HistoryPage() {
   const { plans, loaded, deletePlan, toggleDone } = usePlans();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
 
   const today = getTodayString();
   const selectedPlan = selectedDate
     ? plans.find((p) => p.date === selectedDate)
     : null;
+
+  const goBack = useCallback(() => {
+    setDirection("back");
+    setSelectedDate(null);
+    setConfirmDelete(false);
+  }, []);
+
+  useEdgeSwipeBack(
+    useCallback(() => {
+      if (selectedDate) goBack();
+    }, [selectedDate, goBack])
+  );
 
   if (!loaded) {
     return (
@@ -27,16 +41,16 @@ export default function HistoryPage() {
     const doneCount = selectedPlan.entries.filter((e) => e.isDone).length;
     const totalCount = selectedPlan.entries.length;
 
+    const animClass =
+      direction === "forward" ? "animate-slide-in-right" : "animate-slide-in-left";
+
     return (
-      <div className="flex flex-col">
-        <header className="sticky top-0 z-40 border-b border-border bg-surface px-5 py-4 shadow-lg shadow-black/30">
+      <div className={`flex flex-col ${animClass}`}>
+        <header className="sticky top-0 z-40 border-b border-border header-gradient px-5 py-4 shadow-lg shadow-black/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => {
-                  setSelectedDate(null);
-                  setConfirmDelete(false);
-                }}
+                onClick={goBack}
                 className="rounded-lg p-1 text-text-secondary"
                 aria-label="戻る"
               >
@@ -45,7 +59,7 @@ export default function HistoryPage() {
                 </svg>
               </button>
               <div>
-                <h1 className="text-xl font-bold text-text-primary">
+                <h1 className="text-xl font-bold text-text-primary tracking-tight">
                   {formatDateLabel(selectedDate)}
                 </h1>
                 <p className="text-sm text-text-secondary mt-0.5">
@@ -55,7 +69,6 @@ export default function HistoryPage() {
             </div>
           </div>
 
-          {/* Progress bar */}
           {totalCount > 0 && (
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-bg-secondary">
               <div
@@ -66,17 +79,19 @@ export default function HistoryPage() {
           )}
         </header>
 
-        {/* Task entries */}
         <div className="flex flex-col gap-2 px-4 py-3">
           {/* Undone */}
           {selectedPlan.entries
             .filter((e) => !e.isDone)
-            .map((entry) => (
+            .map((entry, index) => (
               <button
                 key={entry.taskId}
                 onClick={() => toggleDone(selectedDate, entry.taskId)}
-                className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left shadow-md shadow-black/25 border-l-[3px]"
-                style={{ borderLeftColor: getTaskColor(entry.taskId) }}
+                className="flex items-center gap-4 rounded-2xl px-4 py-4 text-left shadow-md shadow-black/25 animate-slide-up"
+                style={{
+                  backgroundColor: getTaskColorMuted(entry.type),
+                  animationDelay: `${Math.min(index, 10) * 40}ms`,
+                }}
               >
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-text-secondary/40 transition-colors" />
                 <div className="flex-1 min-w-0">
@@ -85,22 +100,23 @@ export default function HistoryPage() {
                   </p>
                   <div className="mt-1.5 flex items-center gap-2">
                     <span
-                      className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                        entry.type === "one-off"
-                          ? "bg-text-secondary/15 text-text-secondary"
-                          : "bg-amber/15 text-amber"
-                      }`}
+                      className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium text-white/80"
+                      style={{
+                        backgroundColor: `${getTaskColor(entry.type)}40`,
+                      }}
                     >
                       {entry.type === "one-off" ? "One-Off" : "Regular"}
                     </span>
-                    {entry.category && (
-                      <span className="inline-block rounded-full bg-bg-secondary px-2.5 py-0.5 text-[11px] text-text-secondary">
-                        {entry.category}
+                    {entry.categoryName && (
+                      <span className="inline-block rounded-full bg-surface-highlight px-2.5 py-0.5 text-[11px] text-text-secondary">
+                        {entry.categoryName}
                       </span>
                     )}
                   </div>
                   {entry.note && (
-                    <p className="mt-1.5 text-sm text-text-secondary leading-snug break-words whitespace-pre-wrap">{entry.note}</p>
+                    <p className="mt-1.5 text-sm text-text-secondary leading-snug break-words whitespace-pre-wrap">
+                      {entry.note}
+                    </p>
                   )}
                 </div>
               </button>
@@ -109,7 +125,7 @@ export default function HistoryPage() {
           {/* Done */}
           {doneCount > 0 && (
             <>
-              <div className="px-4 py-2.5 text-xs font-medium uppercase tracking-wider text-text-secondary">
+              <div className="px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-text-secondary">
                 完了済み
               </div>
               {selectedPlan.entries
@@ -118,8 +134,10 @@ export default function HistoryPage() {
                   <button
                     key={entry.taskId}
                     onClick={() => toggleDone(selectedDate, entry.taskId)}
-                    className="flex items-center gap-4 rounded-xl bg-surface px-4 py-4 text-left opacity-50 shadow-md shadow-black/25 border-l-[3px]"
-                    style={{ borderLeftColor: getTaskColor(entry.taskId) }}
+                    className="flex items-center gap-4 rounded-2xl px-4 py-4 text-left opacity-50 shadow-md shadow-black/25"
+                    style={{
+                      backgroundColor: getTaskColorMuted(entry.type),
+                    }}
                   >
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-amber bg-amber transition-colors">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -132,22 +150,18 @@ export default function HistoryPage() {
                       </p>
                       <div className="mt-1.5 flex items-center gap-2">
                         <span
-                          className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                            entry.type === "one-off"
-                              ? "bg-text-secondary/15 text-text-secondary"
-                              : "bg-amber/15 text-amber"
-                          }`}
+                          className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium text-white/60"
+                          style={{
+                            backgroundColor: `${getTaskColor(entry.type)}30`,
+                          }}
                         >
                           {entry.type === "one-off" ? "One-Off" : "Regular"}
                         </span>
-                        {entry.category && (
-                          <span className="inline-block rounded-full bg-bg-secondary px-2.5 py-0.5 text-[11px] text-text-secondary">
-                            {entry.category}
-                          </span>
-                        )}
                       </div>
                       {entry.note && (
-                        <p className="mt-1.5 text-sm text-text-secondary/70 line-through leading-snug break-words whitespace-pre-wrap">{entry.note}</p>
+                        <p className="mt-1.5 text-sm text-text-secondary/70 line-through leading-snug break-words whitespace-pre-wrap">
+                          {entry.note}
+                        </p>
                       )}
                     </div>
                   </button>
@@ -159,20 +173,20 @@ export default function HistoryPage() {
         {/* Delete button */}
         <div className="px-5 py-4">
           {confirmDelete ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 animate-fade-in">
               <button
                 onClick={() => {
                   deletePlan(selectedDate);
                   setSelectedDate(null);
                   setConfirmDelete(false);
                 }}
-                className="flex-1 rounded-xl bg-red-500/20 py-3 text-sm font-medium text-red-400"
+                className="flex-1 rounded-2xl bg-red-500/20 py-3 text-sm font-medium text-red-400"
               >
                 削除する
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="flex-1 rounded-xl border border-border py-3 text-sm text-text-secondary"
+                className="flex-1 rounded-2xl border border-border py-3 text-sm text-text-secondary"
               >
                 キャンセル
               </button>
@@ -180,7 +194,7 @@ export default function HistoryPage() {
           ) : (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="w-full text-center text-sm text-text-secondary hover:text-red-400"
+              className="w-full text-center text-sm text-text-secondary hover:text-red-400 transition-colors"
             >
               この予定を削除
             </button>
@@ -191,10 +205,15 @@ export default function HistoryPage() {
   }
 
   // ─── List view ───
+  const animClass =
+    direction === "back" ? "animate-slide-in-left" : "animate-fade-in";
+
   return (
-    <div className="flex flex-col">
-      <header className="sticky top-0 z-40 border-b border-border bg-surface px-5 py-4 shadow-lg shadow-black/30">
-        <h1 className="text-xl font-bold text-text-primary">確認</h1>
+    <div className={`flex flex-col ${animClass}`}>
+      <header className="sticky top-0 z-40 border-b border-border header-gradient px-5 py-4 shadow-lg shadow-black/30">
+        <h1 className="text-xl font-bold text-text-primary tracking-tight">
+          確認
+        </h1>
         <p className="text-sm text-text-secondary mt-0.5">
           {plans.length > 0
             ? `${plans.length}日分の予定`
@@ -203,7 +222,7 @@ export default function HistoryPage() {
       </header>
 
       {plans.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-20 text-text-secondary">
+        <div className="flex flex-col items-center gap-3 py-20 text-text-secondary animate-fade-in">
           <svg
             width="56"
             height="56"
@@ -219,11 +238,13 @@ export default function HistoryPage() {
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
           </svg>
           <p className="text-base">予定がありません</p>
-          <p className="text-sm">「予定を組む」で予定を作成すると表示されます</p>
+          <p className="text-sm">
+            「予定を組む」で予定を作成すると表示されます
+          </p>
         </div>
       ) : (
         <div className="flex flex-col gap-3 px-4 py-3">
-          {plans.map((plan) => {
+          {plans.map((plan, index) => {
             const doneCount = plan.entries.filter((e) => e.isDone).length;
             const totalCount = plan.entries.length;
             const isToday = plan.date === today;
@@ -231,10 +252,15 @@ export default function HistoryPage() {
             return (
               <button
                 key={plan.date}
-                onClick={() => setSelectedDate(plan.date)}
-                className="flex w-full items-center gap-4 rounded-xl bg-surface px-5 py-4 text-left shadow-md shadow-black/25"
+                onClick={() => {
+                  setDirection("forward");
+                  setSelectedDate(plan.date);
+                }}
+                className="flex w-full items-center gap-4 rounded-2xl bg-surface-elevated px-5 py-4 text-left shadow-md shadow-black/25 animate-slide-up"
+                style={{
+                  animationDelay: `${Math.min(index, 10) * 40}ms`,
+                }}
               >
-                {/* Date */}
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <p className="text-base font-bold text-text-primary">
@@ -251,7 +277,6 @@ export default function HistoryPage() {
                   </p>
                 </div>
 
-                {/* Progress circle */}
                 <div className="relative flex h-11 w-11 shrink-0 items-center justify-center">
                   <svg width="44" height="44" viewBox="0 0 44 44">
                     <circle
@@ -281,7 +306,6 @@ export default function HistoryPage() {
                   </span>
                 </div>
 
-                {/* Arrow */}
                 <svg
                   width="20"
                   height="20"

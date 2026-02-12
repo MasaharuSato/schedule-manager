@@ -19,11 +19,12 @@ export function useTasks() {
   }, [tasks, loaded]);
 
   const addTask = useCallback(
-    (title: string, type: TaskType, category?: string) => {
+    (title: string, type: TaskType, categoryId?: string, groupId?: string) => {
       const newTask: Task = {
         id: crypto.randomUUID(),
         title,
-        category: category || undefined,
+        categoryId: categoryId || undefined,
+        groupId: groupId || undefined,
         type,
         createdAt: new Date().toISOString(),
       };
@@ -47,6 +48,36 @@ export function useTasks() {
     );
   }, []);
 
+  const moveTask = useCallback(
+    (taskId: string, categoryId?: string, groupId?: string) => {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === taskId ? { ...t, categoryId, groupId } : t
+        )
+      );
+    },
+    []
+  );
+
+  // Orphan tasks when a category or group is deleted
+  const orphanByCategory = useCallback((categoryId: string) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.categoryId === categoryId
+          ? { ...t, categoryId: undefined, groupId: undefined }
+          : t
+      )
+    );
+  }, []);
+
+  const orphanByGroup = useCallback((groupId: string) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.groupId === groupId ? { ...t, groupId: undefined } : t
+      )
+    );
+  }, []);
+
   return {
     tasks,
     loaded,
@@ -54,5 +85,8 @@ export function useTasks() {
     deleteTask,
     deleteTasks,
     updateTask,
+    moveTask,
+    orphanByCategory,
+    orphanByGroup,
   };
 }

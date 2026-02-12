@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
+import MigrationRunner from "@/components/MigrationRunner";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -29,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className="antialiased">
+        <MigrationRunner />
         <main className="mx-auto min-h-dvh max-w-md safe-bottom">
           {children}
         </main>

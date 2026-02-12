@@ -5,6 +5,8 @@ import {
   DayPlan,
   DayTaskEntry,
   Task,
+  Category,
+  Group,
   loadPlans,
   savePlans,
   getTodayString,
@@ -36,19 +38,29 @@ export function usePlans() {
     return plans.find((p) => p.date === getTodayString());
   }, [plans]);
 
-  /** 選択したタスクから日別プランを作成・更新 */
   const saveDayPlan = useCallback(
-    (date: string, selectedTasks: Task[], notes?: Map<string, string>): void => {
+    (
+      date: string,
+      selectedTasks: Task[],
+      notes?: Map<string, string>,
+      categories?: Category[],
+      groups?: Group[]
+    ): void => {
       setPlans((prev) => {
         const existing = prev.find((p) => p.date === date);
 
         const entries: DayTaskEntry[] = selectedTasks.map((t) => {
           const prevEntry = existing?.entries.find((e) => e.taskId === t.id);
           const noteValue = notes?.get(t.id);
+          const cat = categories?.find((c) => c.id === t.categoryId);
+          const grp = groups?.find((g) => g.id === t.groupId);
           return {
             taskId: t.id,
             title: t.title,
-            category: t.category,
+            categoryId: t.categoryId,
+            categoryName: cat?.name ?? prevEntry?.categoryName,
+            groupId: t.groupId,
+            groupName: grp?.name ?? prevEntry?.groupName,
             type: t.type,
             isDone: prevEntry?.isDone ?? false,
             note: noteValue !== undefined ? noteValue : prevEntry?.note,
