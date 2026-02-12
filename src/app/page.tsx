@@ -248,7 +248,7 @@ export default function TaskListPage() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
               </svg>
-              タスクを追加
+              ミッションを追加
             </button>
           </div>
         </div>
@@ -341,7 +341,7 @@ export default function TaskListPage() {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                タスク
+                ミッション
               </button>
               <button
                 onClick={() => openAdd("group", catId)}
@@ -366,10 +366,10 @@ export default function TaskListPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-text-primary tracking-tight">
-              タスク一覧
+              ミッション一覧
             </h1>
             <p className="text-sm text-text-secondary mt-0.5">
-              {tasks.length}件のタスク
+              {tasks.length}件のミッション
             </p>
           </div>
           <button
@@ -403,8 +403,8 @@ export default function TaskListPage() {
             <path d="M13 12h4" />
             <path d="M13 16h4" />
           </svg>
-          <p className="text-base">タスクがありません</p>
-          <p className="text-sm">右上の＋ボタンからタスクを追加してください</p>
+          <p className="text-base">ミッションがありません</p>
+          <p className="text-sm">右上の＋ボタンからミッションを追加してください</p>
         </div>
       ) : (
         <div className="flex flex-col gap-1 py-3 pb-8">

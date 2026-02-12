@@ -13,7 +13,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Schedule Manager",
-  description: "タスク管理・1日のスケジュール作成ツール",
+  description: "ミッション管理・1日のスケジュール作成ツール",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

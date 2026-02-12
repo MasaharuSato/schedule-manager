@@ -154,7 +154,7 @@ export default function PlanPage() {
             </p>
             {plan ? (
               <p className="text-sm text-amber mt-1">
-                予定あり · {plan.entries.length}件のタスク
+                予定あり · {plan.entries.length}件のミッション
               </p>
             ) : (
               <p className="text-sm text-text-secondary mt-1">予定なし</p>
@@ -174,7 +174,7 @@ export default function PlanPage() {
               onClick={() => goForward("select")}
               className="w-full rounded-2xl bg-amber py-4 text-base font-semibold text-white shadow-lg shadow-amber/20"
             >
-              {plan ? "タスクを編集する" : "タスクを選ぶ"}
+              {plan ? "ミッションを編集する" : "ミッションを選ぶ"}
             </button>
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function PlanPage() {
     );
   }
 
-  // ─── Step 2: タスクを選ぶ・登録 ───
+  // ─── Step 2: ミッションを選ぶ・登録 ───
   if (step === "select") {
     return (
       <div className={`flex flex-col ${animClass}`} key="select">
@@ -204,7 +204,7 @@ export default function PlanPage() {
             </button>
             <div>
               <h1 className="text-xl font-bold text-text-primary tracking-tight">
-                タスクを選ぶ
+                ミッションを選ぶ
               </h1>
               <p className="text-sm text-text-secondary mt-0.5">
                 {formatDateLabel(selectedDate)}
@@ -215,8 +215,8 @@ export default function PlanPage() {
 
         {tasks.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-20 text-text-secondary animate-fade-in">
-            <p className="text-base">タスクがありません</p>
-            <p className="text-sm">先にタスク一覧でタスクを追加してください</p>
+            <p className="text-base">ミッションがありません</p>
+            <p className="text-sm">先にミッション一覧でミッションを追加してください</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2 px-4 py-3">
@@ -318,7 +318,7 @@ export default function PlanPage() {
               onClick={handleSavePlan}
               className="w-full rounded-2xl bg-amber py-4 text-base font-semibold text-white transition-colors hover:bg-amber-dark shadow-lg shadow-amber/20"
             >
-              {selectedIds.size}件のタスクで予定を確定
+              {selectedIds.size}件のミッションで予定を確定
             </button>
           </div>
         )}
@@ -469,7 +469,7 @@ export default function PlanPage() {
             onClick={() => goForward("select")}
             className="mt-2 rounded-xl bg-amber/15 px-5 py-2.5 text-sm font-medium text-amber"
           >
-            タスクを選ぶ
+            ミッションを選ぶ
           </button>
         </div>
       )}

@@ -104,7 +104,7 @@ export default function AddItemSheet({
             }`}
           >
             {m === "task"
-              ? "タスク"
+              ? "ミッション"
               : m === "category"
               ? "カテゴリ"
               : "グループ"}
@@ -123,7 +123,7 @@ export default function AddItemSheet({
               ? "カテゴリ名"
               : mode === "group"
               ? "グループ名"
-              : "タスク名"
+              : "ミッション名"
           }
           className="w-full rounded-xl border border-border bg-bg-secondary px-4 py-3.5 text-base text-text-primary placeholder:text-text-secondary/50 focus:border-amber focus:outline-none"
           autoFocus
