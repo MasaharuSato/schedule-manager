@@ -227,7 +227,7 @@ export default function AddItemSheet({
           追加する
         </button>
 
-        <div className="h-20" />
+        <div className="h-10" />
       </form>
     </BottomSheet>
   );
