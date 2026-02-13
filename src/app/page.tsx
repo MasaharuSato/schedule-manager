@@ -8,6 +8,7 @@ import SwipeableItem from "@/components/SwipeableItem";
 import AddItemSheet from "@/components/AddItemSheet";
 import MoveTaskSheet from "@/components/MoveTaskSheet";
 import DataTransfer from "@/components/DataTransfer";
+import QuickAddSheet from "@/components/QuickAddSheet";
 
 export default function TaskListPage() {
   const {
@@ -43,6 +44,19 @@ export default function TaskListPage() {
   const [editTitle, setEditTitle] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [showDataTransfer, setShowDataTransfer] = useState(false);
+  const [quickAdd, setQuickAdd] = useState<{
+    mode: "task" | "subgroup";
+    catId: string;
+    groupId: string;
+    groupName: string;
+  } | null>(null);
+
+  const openQuickAdd = useCallback(
+    (mode: "task" | "subgroup", catId: string, groupId: string, groupName: string) => {
+      setQuickAdd({ mode, catId, groupId, groupName });
+    },
+    []
+  );
 
   const toggleExpand = useCallback((id: string) => {
     setExpanded((prev) => {
@@ -289,7 +303,7 @@ export default function TaskListPage() {
             {/* Add buttons */}
             <div className="flex gap-2 pl-1">
               <button
-                onClick={() => openAdd("task", catId, groupId)}
+                onClick={() => openQuickAdd("task", catId, groupId, groupName)}
                 className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-text-secondary/60 hover:text-text-secondary"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -298,7 +312,7 @@ export default function TaskListPage() {
                 ミッション
               </button>
               <button
-                onClick={() => openAdd("group", catId, undefined, groupId)}
+                onClick={() => openQuickAdd("subgroup", catId, groupId, groupName)}
                 className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-text-secondary/60 hover:text-text-secondary"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -591,6 +605,18 @@ export default function TaskListPage() {
       <DataTransfer
         open={showDataTransfer}
         onClose={() => setShowDataTransfer(false)}
+      />
+      <QuickAddSheet
+        isOpen={!!quickAdd}
+        onClose={() => setQuickAdd(null)}
+        mode={quickAdd?.mode ?? "task"}
+        groupName={quickAdd?.groupName ?? ""}
+        onAddTask={(title, type) => {
+          if (quickAdd) addTask(title, type, quickAdd.catId, quickAdd.groupId);
+        }}
+        onAddSubGroup={(name) => {
+          if (quickAdd) addGroup(name, quickAdd.catId, quickAdd.groupId);
+        }}
       />
     </div>
   );
