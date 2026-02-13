@@ -181,7 +181,8 @@ body {
 /* Notes scroll — GPU-promoted layer, inertial */
 .notes-scroll {
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: auto;
   transform: translateZ(0);
   will-change: transform;
 }

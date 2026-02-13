@@ -277,7 +277,7 @@ const NoteEditor = memo(function NoteEditor({
 
       <div
         className="notes-scroll flex-1"
-        style={{ overflowY: "auto", overflowX: "hidden", contain: "layout style paint", touchAction: "pan-y", overscrollBehaviorX: "none" }}
+        style={{ overflowY: "auto", overflowX: "hidden", contain: "layout style paint", touchAction: "pan-y", overscrollBehaviorX: "none", overscrollBehaviorY: "auto" }}
       >
         <div className="px-4 pt-6 pb-40">
           <input
