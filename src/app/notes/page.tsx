@@ -244,7 +244,7 @@ const NoteEditor = memo(function NoteEditor({
   return (
     <div
       className="notes-page notes-push-in"
-      style={{ height: "100dvh", display: "flex", flexDirection: "column" }}
+      style={{ height: "100dvh", display: "flex", flexDirection: "column", overflowX: "hidden", touchAction: "pan-y" }}
     >
       <nav
         className="flex items-center justify-between px-1 py-1 notes-nav-bar backdrop-blur-xl"
@@ -943,7 +943,7 @@ export default function NotesPage() {
     return (
       <div
         className={`flex flex-col min-h-dvh notes-page ${dir === "b" ? "notes-pop-in" : "notes-push-in"}`}
-        style={{ transform: "translateZ(0)" }}
+        style={{ transform: "translateZ(0)", overflowX: "hidden", touchAction: "pan-y" }}
         key="folder"
       >
         {/* Nav */}
@@ -1084,7 +1084,7 @@ export default function NotesPage() {
   return (
     <div
       className={`flex flex-col min-h-dvh notes-page ${dir === "b" ? "notes-pop-in" : "animate-fade-in"}`}
-      style={{ transform: "translateZ(0)" }}
+      style={{ transform: "translateZ(0)", overflowX: "hidden", touchAction: "pan-y" }}
       key="root"
     >
       {/* iOS large-title header */}
