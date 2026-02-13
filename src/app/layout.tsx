@@ -12,13 +12,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Schedule Manager",
+  title: "LIFER",
   description: "ミッション管理・1日のスケジュール作成ツール",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Schedule",
+    title: "LIFER",
   },
 };
 

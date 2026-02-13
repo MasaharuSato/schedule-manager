@@ -1,6 +1,6 @@
 {
-  "name": "Schedule Manager",
-  "short_name": "Schedule",
+  "name": "LIFER",
+  "short_name": "LIFER",
   "description": "ミッション管理・1日のスケジュール作成ツール",
   "start_url": "/",
   "display": "standalone",
