@@ -161,6 +161,7 @@ const NoteEditor = memo(function NoteEditor({
 }: EditorProps) {
   const titleEl = useRef<HTMLInputElement>(null);
   const bodyEl = useRef<HTMLTextAreaElement>(null);
+  const scrollEl = useRef<HTMLDivElement>(null);
   const tv = useRef(initTitle);
   const bv = useRef(initBody);
   const timer = useRef(0);
@@ -189,6 +190,45 @@ const NoteEditor = memo(function NoteEditor({
   useEffect(() => {
     const tEl = titleEl.current!;
     const bEl = bodyEl.current!;
+    const sEl = scrollEl.current!;
+    let followRaf = 0;
+
+    /* ── caret → scroll follow ── */
+    const ensureCaretVisible = () => {
+      if (!sEl || document.activeElement !== bEl) return;
+      const text = bEl.value.substring(0, bEl.selectionEnd);
+      const cs = getComputedStyle(bEl);
+      const mirror = document.createElement("div");
+      mirror.style.cssText =
+        `position:absolute;visibility:hidden;pointer-events:none;white-space:pre-wrap;` +
+        `word-break:break-word;overflow-wrap:anywhere;width:${bEl.clientWidth}px;` +
+        `font:${cs.font};line-height:${cs.lineHeight};letter-spacing:${cs.letterSpacing};` +
+        `padding:0;border:none;`;
+      mirror.textContent = text + "\u200b";
+      document.body.appendChild(mirror);
+      const caretH = mirror.offsetHeight;
+      document.body.removeChild(mirror);
+
+      const bRect = bEl.getBoundingClientRect();
+      const sRect = sEl.getBoundingClientRect();
+      const lineH = parseFloat(cs.lineHeight) || 25;
+      const margin = 36;
+      const vvh = window.visualViewport?.height ?? window.innerHeight;
+      const visibleBottom = Math.min(sRect.bottom, vvh);
+      const caretBottom = bRect.top + caretH;
+      const caretTop = caretBottom - lineH;
+
+      if (caretBottom > visibleBottom - margin) {
+        sEl.scrollTop += caretBottom - visibleBottom + margin;
+      } else if (caretTop < sRect.top) {
+        sEl.scrollTop -= sRect.top - caretTop;
+      }
+    };
+
+    const schedFollow = () => {
+      cancelAnimationFrame(followRaf);
+      followRaf = requestAnimationFrame(ensureCaretVisible);
+    };
 
     const onTitle = () => {
       tv.current = tEl.value;
@@ -201,11 +241,22 @@ const NoteEditor = memo(function NoteEditor({
       requestAnimationFrame(() => {
         bEl.style.height = "auto";
         bEl.style.height = bEl.scrollHeight + "px";
+        ensureCaretVisible();
       });
     };
 
+    const onSelChange = () => {
+      if (document.activeElement === bEl) schedFollow();
+    };
+
+    const vv = window.visualViewport;
+
     tEl.addEventListener("input", onTitle, { passive: true });
     bEl.addEventListener("input", onBody, { passive: true });
+    bEl.addEventListener("compositionend", schedFollow, { passive: true });
+    bEl.addEventListener("focus", schedFollow, { passive: true });
+    document.addEventListener("selectionchange", onSelChange, { passive: true });
+    if (vv) vv.addEventListener("resize", schedFollow, { passive: true });
 
     requestAnimationFrame(() => {
       bEl.style.height = "auto";
@@ -216,8 +267,13 @@ const NoteEditor = memo(function NoteEditor({
 
     return () => {
       alive.current = false;
+      cancelAnimationFrame(followRaf);
       tEl.removeEventListener("input", onTitle);
       bEl.removeEventListener("input", onBody);
+      bEl.removeEventListener("compositionend", schedFollow);
+      bEl.removeEventListener("focus", schedFollow);
+      document.removeEventListener("selectionchange", onSelChange);
+      if (vv) vv.removeEventListener("resize", schedFollow);
     };
   }, [sched, initTitle, initBody]);
 
@@ -276,6 +332,7 @@ const NoteEditor = memo(function NoteEditor({
       </nav>
 
       <div
+        ref={scrollEl}
         className="notes-scroll flex-1"
         style={{ overflowY: "auto", overflowX: "hidden", contain: "layout style paint", touchAction: "pan-y", overscrollBehaviorX: "none", overscrollBehaviorY: "auto" }}
       >
