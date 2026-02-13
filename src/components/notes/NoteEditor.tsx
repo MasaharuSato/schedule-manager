@@ -18,17 +18,6 @@ function deleteNoteDirect(id: string) {
   saveNotes(loadNotes().filter((n) => n.id !== id));
 }
 
-/* ── Idle scheduler ── */
-
-const rIC =
-  typeof window !== "undefined" && "requestIdleCallback" in window
-    ? window.requestIdleCallback
-    : (cb: () => void) => window.setTimeout(cb, 1);
-const cIC =
-  typeof window !== "undefined" && "cancelIdleCallback" in window
-    ? window.cancelIdleCallback
-    : (id: number) => window.clearTimeout(id);
-
 /* ══════════════════════════════════════════ */
 
 interface NoteEditorProps {
@@ -46,27 +35,17 @@ export const NoteEditor = memo(function NoteEditor({
   const scrollEl = useRef<HTMLDivElement>(null);
   const tv = useRef(initTitle);
   const bv = useRef(initBody);
-  const timer = useRef(0);
-  const idleHandle = useRef(0);
-  const alive = useRef(true);
   const stick = useRef(true);
 
+  const save = useCallback(() => {
+    saveNoteDirect(noteId, tv.current, bv.current);
+  }, [noteId]);
+
   const flush = useCallback(() => {
-    clearTimeout(timer.current);
-    cIC(idleHandle.current);
     const t = tv.current.trim();
     const b = bv.current.trim();
     if (!t && !b) deleteNoteDirect(noteId);
     else saveNoteDirect(noteId, tv.current, bv.current);
-  }, [noteId]);
-
-  const sched = useCallback(() => {
-    clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => {
-      idleHandle.current = rIC(() => {
-        if (alive.current) saveNoteDirect(noteId, tv.current, bv.current);
-      });
-    }, 500);
   }, [noteId]);
 
   /* ── Wire up events ── */
@@ -144,7 +123,7 @@ export const NoteEditor = memo(function NoteEditor({
       followRaf = requestAnimationFrame(() => followCaret(false));
     };
 
-    const onTitle = () => { tv.current = tEl.value; sched(); };
+    const onTitle = () => { tv.current = tEl.value; save(); };
 
     /* ── Resize textarea (single-frame resize + caret follow) ── */
     const onBody = () => {
@@ -154,7 +133,7 @@ export const NoteEditor = memo(function NoteEditor({
 
       bv.current = bEl.value;
       if (!bEl.value) stick.current = true;
-      sched();
+      save();
 
       requestAnimationFrame(() => {
         // Only reset height when content shrinks; growing needs no reset
@@ -205,7 +184,6 @@ export const NoteEditor = memo(function NoteEditor({
     if (!initTitle && !initBody) tEl.focus();
 
     return () => {
-      alive.current = false;
       cancelAnimationFrame(followRaf);
       clearTimeout(scrollTimer);
       if (mirror.parentNode) mirror.parentNode.removeChild(mirror);
@@ -217,7 +195,7 @@ export const NoteEditor = memo(function NoteEditor({
       sEl.removeEventListener("scroll", onContainerScroll);
       if (vv) vv.removeEventListener("resize", schedFollow);
     };
-  }, [sched, initTitle, initBody]);
+  }, [save, initTitle, initBody]);
 
   /* ── Flush on visibility change / unload ── */
   useEffect(() => {
