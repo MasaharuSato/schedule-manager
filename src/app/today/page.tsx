@@ -226,6 +226,8 @@ export default function PlanPage() {
               const noteText = notes.get(task.id) ?? "";
               const bgMuted = getTaskColorMuted(task.type);
               const color = getTaskColor(task.type);
+              const catName = categories.find((c) => c.id === task.categoryId)?.name;
+              const grpName = groups.find((g) => g.id === task.groupId)?.name;
 
               return (
                 <div
@@ -262,13 +264,23 @@ export default function PlanPage() {
                       <p className="text-base font-bold text-text-primary leading-snug break-words">
                         {task.title}
                       </p>
-                      <div className="mt-1.5 flex items-center gap-2">
+                      <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                         <span
                           className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium text-white/80"
                           style={{ backgroundColor: `${color}40` }}
                         >
                           {task.type === "one-off" ? "One-Off" : "Regular"}
                         </span>
+                        {catName && (
+                          <span className="inline-block rounded-full bg-surface-highlight px-2.5 py-0.5 text-[11px] text-text-secondary">
+                            {catName}
+                          </span>
+                        )}
+                        {grpName && (
+                          <span className="inline-block rounded-full bg-surface-highlight px-2.5 py-0.5 text-[11px] text-text-secondary">
+                            {grpName}
+                          </span>
+                        )}
                       </div>
                       {isSelected && !isDetailOpen && noteText && (
                         <p className="mt-1.5 text-sm text-text-secondary leading-snug break-words whitespace-pre-wrap">
