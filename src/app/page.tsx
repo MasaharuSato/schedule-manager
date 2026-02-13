@@ -48,27 +48,31 @@ export default function TaskListPage() {
     });
   }, []);
 
+  const getNonEmptyIds = useCallback(() => {
+    const ids: string[] = [];
+    for (const c of categories) {
+      if (tasks.some((t) => t.categoryId === c.id)) ids.push(c.id);
+    }
+    for (const g of groups) {
+      if (tasks.some((t) => t.groupId === g.id)) ids.push(g.id);
+    }
+    if (tasks.some((t) => !t.categoryId)) ids.push("__uncategorized");
+    return ids;
+  }, [categories, groups, tasks]);
+
   const allExpanded = (() => {
-    const allIds = [
-      ...categories.map((c) => c.id),
-      ...groups.map((g) => g.id),
-      "__uncategorized",
-    ];
-    return allIds.length > 0 && allIds.every((id) => expanded.has(id));
+    const ids = getNonEmptyIds();
+    return ids.length > 0 && ids.every((id) => expanded.has(id));
   })();
 
   const toggleAll = useCallback(() => {
+    const ids = getNonEmptyIds();
     setExpanded((prev) => {
-      const allIds = [
-        ...categories.map((c) => c.id),
-        ...groups.map((g) => g.id),
-        "__uncategorized",
-      ];
-      const allOpen = allIds.every((id) => prev.has(id));
+      const allOpen = ids.every((id) => prev.has(id));
       if (allOpen) return new Set<string>();
-      return new Set(allIds);
+      return new Set(ids);
     });
-  }, [categories, groups]);
+  }, [getNonEmptyIds]);
 
   const openAdd = useCallback(
     (mode: "task" | "category" | "group", catId?: string, grpId?: string) => {
