@@ -196,13 +196,14 @@ const NoteEditor = memo(function NoteEditor({
     let scrollTimer = 0;
     let programmaticScroll = false;
 
-    /* (1) Initialize stick: true when empty or content fits */
-    stick.current = !bEl.value || sEl.scrollHeight <= sEl.clientHeight;
+    /* (1)(4) Initialize */
+    stick.current = true;
+    let wasOverflowing = sEl.scrollHeight > sEl.clientHeight;
 
     /* ── follow caret ── */
-    const followCaret = () => {
+    const followCaret = (force = false) => {
       if (!sEl || document.activeElement !== bEl) return;
-      if (!stick.current) return;
+      if (!force && !stick.current) return;
 
       const margin = 36;
       const vvh = window.visualViewport?.height ?? window.innerHeight;
@@ -214,10 +215,8 @@ const NoteEditor = memo(function NoteEditor({
       const atEnd = bEl.selectionEnd >= bEl.value.length;
 
       if (atEnd) {
-        /* Fast path: caret at end → use textarea geometry directly */
         caretBottom = bRect.top + bEl.offsetHeight;
       } else {
-        /* General case: measure with mirror div */
         const text = bEl.value.substring(0, bEl.selectionEnd);
         const cs = getComputedStyle(bEl);
         const mirror = document.createElement("div");
@@ -247,7 +246,7 @@ const NoteEditor = memo(function NoteEditor({
 
     const schedFollow = () => {
       cancelAnimationFrame(followRaf);
-      followRaf = requestAnimationFrame(followCaret);
+      followRaf = requestAnimationFrame(() => followCaret(false));
     };
 
     /* ── event handlers ── */
@@ -258,15 +257,23 @@ const NoteEditor = memo(function NoteEditor({
 
     const onBody = () => {
       bv.current = bEl.value;
+      if (!bEl.value) stick.current = true;
       sched();
+      /* Frame 1: resize textarea */
       requestAnimationFrame(() => {
         bEl.style.height = "auto";
         bEl.style.height = bEl.scrollHeight + "px";
-        followCaret();
+        /* (3) Detect non-overflow → overflow transition */
+        const isOverflowing = sEl.scrollHeight > sEl.clientHeight;
+        const justOverflowed = !wasOverflowing && isOverflowing;
+        wasOverflowing = isOverflowing;
+        /* Frame 2: follow caret after layout settles */
+        requestAnimationFrame(() => {
+          followCaret(justOverflowed);
+        });
       });
     };
 
-    /* (2) Focus → re-engage stick + follow */
     const onBodyFocus = () => {
       stick.current = true;
       schedFollow();
@@ -276,7 +283,7 @@ const NoteEditor = memo(function NoteEditor({
       if (document.activeElement === bEl) schedFollow();
     };
 
-    /* (4)(5) Manual scroll → update stick state */
+    /* (5) Manual scroll → update stick state */
     const onContainerScroll = () => {
       if (programmaticScroll) {
         programmaticScroll = false;
