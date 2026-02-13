@@ -1,6 +1,8 @@
 const TASKS_KEY = "schedule-manager-tasks";
 const PLANS_KEY = "schedule-manager-plans";
 const CATEGORIES_KEY = "schedule-manager-categories";
+const NOTES_KEY = "schedule-manager-notes";
+const NOTE_FOLDERS_KEY = "schedule-manager-note-folders";
 
 export type TaskType = "one-off" | "regular";
 
@@ -104,6 +106,55 @@ export function loadCategoryStore(): CategoryStore {
 export function saveCategoryStore(store: CategoryStore): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(CATEGORIES_KEY, JSON.stringify(store));
+}
+
+// --- Note Folders ---
+export interface NoteFolder {
+  id: string;
+  name: string;
+  order: number;
+  createdAt: string;
+}
+
+export function loadNoteFolders(): NoteFolder[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(NOTE_FOLDERS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveNoteFolders(folders: NoteFolder[]): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(NOTE_FOLDERS_KEY, JSON.stringify(folders));
+}
+
+// --- Notes ---
+export interface Note {
+  id: string;
+  title: string;
+  body: string;
+  folderId?: string;
+  isPinned?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export function loadNotes(): Note[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(NOTES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveNotes(notes: Note[]): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
 }
 
 // --- Utility ---

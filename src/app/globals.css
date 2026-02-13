@@ -139,6 +139,73 @@ body {
   animation: checkPop 0.2s ease-out;
 }
 
+/* ── Apple Notes tokens (dark mode) ── */
+:root {
+  --notes-bg: #000000;
+  --notes-surface: #1C1C1E;
+  --notes-cell-active: rgba(255, 255, 255, 0.05);
+  --notes-separator: rgba(255, 255, 255, 0.08);
+  --notes-primary: #FFFFFF;
+  --notes-secondary: #8E8E93;
+  --notes-tertiary: #636366;
+  --notes-quaternary: rgba(255, 255, 255, 0.18);
+  --notes-search-bg: rgba(255, 255, 255, 0.08);
+  --notes-nav-bg: rgba(0, 0, 0, 0.72);
+}
+
+.notes-page {
+  background: var(--notes-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Helvetica Neue", sans-serif;
+}
+
+.notes-font {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Helvetica Neue", sans-serif;
+}
+
+.notes-nav-bar { background: var(--notes-nav-bg); }
+.notes-search-bg { background: var(--notes-search-bg); }
+.notes-separator-line { background: var(--notes-separator); }
+
+.notes-cell {
+  background: var(--notes-bg);
+}
+.notes-cell:active {
+  background: var(--notes-cell-active);
+}
+
+.notes-page input::placeholder,
+.notes-page textarea::placeholder {
+  color: var(--notes-quaternary);
+}
+
+/* Notes scroll — GPU-promoted layer, inertial */
+.notes-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: auto;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* iOS push/pop transitions — 220ms ease-out, transform-only */
+@keyframes notesPushIn {
+  from { transform: translate3d(100%, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes notesPopIn {
+  from { transform: translate3d(-20%, 0, 0); opacity: 0.5; }
+  to { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+
+.notes-push-in {
+  animation: notesPushIn 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  will-change: transform;
+}
+.notes-pop-in {
+  animation: notesPopIn 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  will-change: transform, opacity;
+}
+
 /* Header gradient */
 .header-gradient {
   background: linear-gradient(
