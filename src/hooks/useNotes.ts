@@ -1,53 +1,114 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Note, loadNotes, saveNotes } from "@/lib/storage";
+import { useState, useEffect, useCallback } from "react";
+import {
+  Note,
+  NoteFolder,
+  loadNotes,
+  saveNotes,
+  loadNoteFolders,
+  saveNoteFolders,
+} from "@/lib/storage";
 
 export function useNotes() {
-  const [notes, setNotes] = useState<Note[]>(() => loadNotes());
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [folders, setFolders] = useState<NoteFolder[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
-  const persist = useCallback((updated: Note[]) => {
-    setNotes(updated);
-    saveNotes(updated);
+  useEffect(() => {
+    setNotes(loadNotes());
+    setFolders(loadNoteFolders().sort((a, b) => a.order - b.order));
+    setLoaded(true);
   }, []);
 
-  const addNote = useCallback((): string => {
+  useEffect(() => {
+    if (loaded) saveNotes(notes);
+  }, [notes, loaded]);
+
+  useEffect(() => {
+    if (loaded) saveNoteFolders(folders);
+  }, [folders, loaded]);
+
+  /* ── Refresh from storage (after editor direct-writes) ── */
+  const refresh = useCallback(() => {
+    setNotes(loadNotes());
+    setFolders(loadNoteFolders().sort((a, b) => a.order - b.order));
+  }, []);
+
+  /* ── Note CRUD ── */
+
+  const addNote = useCallback((folderId?: string): string => {
     const now = new Date().toISOString();
-    const note: Note = {
-      id: crypto.randomUUID(),
-      title: "",
-      body: "",
-      createdAt: now,
-      updatedAt: now,
-    };
-    const updated = [note, ...notes];
-    persist(updated);
-    return note.id;
-  }, [notes, persist]);
+    const id = crypto.randomUUID();
+    setNotes((prev) => [
+      { id, title: "", body: "", folderId, createdAt: now, updatedAt: now },
+      ...prev,
+    ]);
+    return id;
+  }, []);
 
-  const updateNote = useCallback(
-    (id: string, title: string, body: string) => {
-      const updated = notes.map((n) =>
+  const deleteNote = useCallback((id: string) => {
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+  }, []);
+
+  const pinNote = useCallback((id: string) => {
+    setNotes((prev) =>
+      prev.map((n) =>
         n.id === id
-          ? { ...n, title, body, updatedAt: new Date().toISOString() }
+          ? { ...n, isPinned: !n.isPinned, updatedAt: new Date().toISOString() }
           : n
-      );
-      persist(updated);
-    },
-    [notes, persist]
-  );
+      )
+    );
+  }, []);
 
-  const deleteNote = useCallback(
-    (id: string) => {
-      persist(notes.filter((n) => n.id !== id));
-    },
-    [notes, persist]
-  );
+  const moveNote = useCallback((id: string, folderId: string | undefined) => {
+    setNotes((prev) =>
+      prev.map((n) =>
+        n.id === id
+          ? { ...n, folderId, updatedAt: new Date().toISOString() }
+          : n
+      )
+    );
+  }, []);
 
-  const sortedNotes = [...notes].sort(
-    (a, b) =>
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  );
+  /* ── Folder CRUD ── */
 
-  return { notes: sortedNotes, addNote, updateNote, deleteNote };
+  const addFolder = useCallback((name: string): string => {
+    const id = crypto.randomUUID();
+    setFolders((prev) => [
+      ...prev,
+      { id, name, order: prev.length, createdAt: new Date().toISOString() },
+    ]);
+    return id;
+  }, []);
+
+  const renameFolder = useCallback((id: string, name: string) => {
+    setFolders((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, name } : f))
+    );
+  }, []);
+
+  const deleteFolder = useCallback((id: string) => {
+    setFolders((prev) => prev.filter((f) => f.id !== id));
+    // Orphan notes in deleted folder
+    setNotes((prev) =>
+      prev.map((n) =>
+        n.folderId === id ? { ...n, folderId: undefined } : n
+      )
+    );
+  }, []);
+
+  return {
+    notes,
+    folders,
+    loaded,
+    refresh,
+    addNote,
+    deleteNote,
+    pinNote,
+    moveNote,
+    addFolder,
+    renameFolder,
+    deleteFolder,
+  };
 }
