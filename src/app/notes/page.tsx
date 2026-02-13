@@ -167,6 +167,7 @@ const NoteEditor = memo(function NoteEditor({
   const timer = useRef(0);
   const idleHandle = useRef(0);
   const alive = useRef(true);
+  const stick = useRef(true); // stick-to-bottom: auto-follow caret
 
   const flush = useCallback(() => {
     clearTimeout(timer.current);
@@ -192,44 +193,64 @@ const NoteEditor = memo(function NoteEditor({
     const bEl = bodyEl.current!;
     const sEl = scrollEl.current!;
     let followRaf = 0;
+    let scrollTimer = 0;
+    let programmaticScroll = false;
 
-    /* ── caret → scroll follow ── */
-    const ensureCaretVisible = () => {
+    /* (1) Initialize stick: true when empty or content fits */
+    stick.current = !bEl.value || sEl.scrollHeight <= sEl.clientHeight;
+
+    /* ── follow caret ── */
+    const followCaret = () => {
       if (!sEl || document.activeElement !== bEl) return;
-      const text = bEl.value.substring(0, bEl.selectionEnd);
-      const cs = getComputedStyle(bEl);
-      const mirror = document.createElement("div");
-      mirror.style.cssText =
-        `position:absolute;visibility:hidden;pointer-events:none;white-space:pre-wrap;` +
-        `word-break:break-word;overflow-wrap:anywhere;width:${bEl.clientWidth}px;` +
-        `font:${cs.font};line-height:${cs.lineHeight};letter-spacing:${cs.letterSpacing};` +
-        `padding:0;border:none;`;
-      mirror.textContent = text + "\u200b";
-      document.body.appendChild(mirror);
-      const caretH = mirror.offsetHeight;
-      document.body.removeChild(mirror);
+      if (!stick.current) return;
 
-      const bRect = bEl.getBoundingClientRect();
-      const sRect = sEl.getBoundingClientRect();
-      const lineH = parseFloat(cs.lineHeight) || 25;
       const margin = 36;
       const vvh = window.visualViewport?.height ?? window.innerHeight;
+      const sRect = sEl.getBoundingClientRect();
+      const bRect = bEl.getBoundingClientRect();
       const visibleBottom = Math.min(sRect.bottom, vvh);
-      const caretBottom = bRect.top + caretH;
+
+      let caretBottom: number;
+      const atEnd = bEl.selectionEnd >= bEl.value.length;
+
+      if (atEnd) {
+        /* Fast path: caret at end → use textarea geometry directly */
+        caretBottom = bRect.top + bEl.offsetHeight;
+      } else {
+        /* General case: measure with mirror div */
+        const text = bEl.value.substring(0, bEl.selectionEnd);
+        const cs = getComputedStyle(bEl);
+        const mirror = document.createElement("div");
+        mirror.style.cssText =
+          `position:absolute;visibility:hidden;pointer-events:none;white-space:pre-wrap;` +
+          `word-break:break-word;overflow-wrap:anywhere;width:${bEl.clientWidth}px;` +
+          `font:${cs.font};line-height:${cs.lineHeight};letter-spacing:${cs.letterSpacing};` +
+          `padding:0;border:none;`;
+        mirror.textContent = text + "\u200b";
+        document.body.appendChild(mirror);
+        caretBottom = bRect.top + mirror.offsetHeight;
+        document.body.removeChild(mirror);
+      }
+
+      const cs = getComputedStyle(bEl);
+      const lineH = parseFloat(cs.lineHeight) || 25;
       const caretTop = caretBottom - lineH;
 
       if (caretBottom > visibleBottom - margin) {
+        programmaticScroll = true;
         sEl.scrollTop += caretBottom - visibleBottom + margin;
       } else if (caretTop < sRect.top) {
+        programmaticScroll = true;
         sEl.scrollTop -= sRect.top - caretTop;
       }
     };
 
     const schedFollow = () => {
       cancelAnimationFrame(followRaf);
-      followRaf = requestAnimationFrame(ensureCaretVisible);
+      followRaf = requestAnimationFrame(followCaret);
     };
 
+    /* ── event handlers ── */
     const onTitle = () => {
       tv.current = tEl.value;
       sched();
@@ -241,12 +262,31 @@ const NoteEditor = memo(function NoteEditor({
       requestAnimationFrame(() => {
         bEl.style.height = "auto";
         bEl.style.height = bEl.scrollHeight + "px";
-        ensureCaretVisible();
+        followCaret();
       });
+    };
+
+    /* (2) Focus → re-engage stick + follow */
+    const onBodyFocus = () => {
+      stick.current = true;
+      schedFollow();
     };
 
     const onSelChange = () => {
       if (document.activeElement === bEl) schedFollow();
+    };
+
+    /* (4)(5) Manual scroll → update stick state */
+    const onContainerScroll = () => {
+      if (programmaticScroll) {
+        programmaticScroll = false;
+        return;
+      }
+      clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        const gap = sEl.scrollHeight - sEl.scrollTop - sEl.clientHeight;
+        stick.current = gap < 60;
+      }, 80);
     };
 
     const vv = window.visualViewport;
@@ -254,8 +294,9 @@ const NoteEditor = memo(function NoteEditor({
     tEl.addEventListener("input", onTitle, { passive: true });
     bEl.addEventListener("input", onBody, { passive: true });
     bEl.addEventListener("compositionend", schedFollow, { passive: true });
-    bEl.addEventListener("focus", schedFollow, { passive: true });
+    bEl.addEventListener("focus", onBodyFocus, { passive: true });
     document.addEventListener("selectionchange", onSelChange, { passive: true });
+    sEl.addEventListener("scroll", onContainerScroll, { passive: true });
     if (vv) vv.addEventListener("resize", schedFollow, { passive: true });
 
     requestAnimationFrame(() => {
@@ -268,11 +309,13 @@ const NoteEditor = memo(function NoteEditor({
     return () => {
       alive.current = false;
       cancelAnimationFrame(followRaf);
+      clearTimeout(scrollTimer);
       tEl.removeEventListener("input", onTitle);
       bEl.removeEventListener("input", onBody);
       bEl.removeEventListener("compositionend", schedFollow);
-      bEl.removeEventListener("focus", schedFollow);
+      bEl.removeEventListener("focus", onBodyFocus);
       document.removeEventListener("selectionchange", onSelChange);
+      sEl.removeEventListener("scroll", onContainerScroll);
       if (vv) vv.removeEventListener("resize", schedFollow);
     };
   }, [sched, initTitle, initBody]);
