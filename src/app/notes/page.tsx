@@ -271,7 +271,7 @@ const NoteEditor = memo(function NoteEditor({
 
       <div
         className="notes-scroll flex-1"
-        style={{ overflowY: "auto", contain: "layout style" }}
+        style={{ overflowY: "auto", overflowX: "hidden", contain: "layout style", touchAction: "pan-y" }}
       >
         <div className="px-4 pt-6 pb-40">
           <input
@@ -287,7 +287,7 @@ const NoteEditor = memo(function NoteEditor({
             defaultValue={initBody}
             placeholder="メモ"
             className="w-full mt-3 text-[17px] leading-[1.47] bg-transparent border-none outline-none resize-none notes-font"
-            style={{ color: "var(--notes-primary)", caretColor: "var(--color-amber)", minHeight: "300px" }}
+            style={{ color: "var(--notes-primary)", caretColor: "var(--color-amber)", minHeight: "300px", overflowX: "hidden", wordBreak: "break-word" }}
           />
         </div>
       </div>
