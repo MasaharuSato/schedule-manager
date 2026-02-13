@@ -273,12 +273,12 @@ export default function PlanPage() {
                         </span>
                         {catName && (
                           <span className="inline-block rounded-full bg-surface-highlight px-2.5 py-0.5 text-[11px] text-text-secondary">
-                            {catName}
+                            <span className="text-text-secondary/50">カテゴリ:</span> {catName}
                           </span>
                         )}
                         {grpName && (
                           <span className="inline-block rounded-full bg-surface-highlight px-2.5 py-0.5 text-[11px] text-text-secondary">
-                            {grpName}
+                            <span className="text-text-secondary/50">グループ:</span> {grpName}
                           </span>
                         )}
                       </div>
