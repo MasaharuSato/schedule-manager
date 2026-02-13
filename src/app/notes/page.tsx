@@ -835,6 +835,18 @@ export default function NotesPage() {
     setRenameName(f.name);
   }, [folders]);
 
+  /* Edge swipe: folder → root, root/edit → just block browser back */
+  const edgeSwipeCb = useCallback(() => {
+    if (view === "folder") {
+      setDir("b");
+      setView("root");
+      setActiveFolderId(null);
+      refresh();
+    }
+  }, [view, refresh]);
+
+  useEdgeSwipeBack(view === "folder" ? edgeSwipeCb : null);
+
   /* ── Edit view ── */
   if (view === "edit") {
     return (
