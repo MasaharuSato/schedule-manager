@@ -226,6 +226,7 @@ export default function HistoryPage() {
   return (
     <div className={`flex flex-col ${animClass}`}>
       <header className="sticky top-0 z-40 border-b border-border header-gradient px-5 py-4 shadow-lg shadow-black/30">
+        <p className="text-xs font-semibold italic text-amber tracking-wider">LIFER</p>
         <h1 className="text-xl font-bold text-text-primary tracking-tight">
           確認
         </h1>

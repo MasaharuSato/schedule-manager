@@ -157,6 +157,39 @@ export function saveNotes(notes: Note[]): void {
   localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
 }
 
+// --- Data Export / Import ---
+export interface ExportData {
+  version: 1;
+  exportedAt: string;
+  tasks: Task[];
+  plans: DayPlan[];
+  categoryStore: CategoryStore;
+  notes: Note[];
+  noteFolders: NoteFolder[];
+}
+
+export function exportAllData(): ExportData {
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    tasks: loadTasks(),
+    plans: loadPlans(),
+    categoryStore: loadCategoryStore(),
+    notes: loadNotes(),
+    noteFolders: loadNoteFolders(),
+  };
+}
+
+export function importAllData(data: ExportData): void {
+  if (typeof window === "undefined") return;
+  if (data.version !== 1) throw new Error("Unsupported data version");
+  saveTasks(data.tasks ?? []);
+  savePlans(data.plans ?? []);
+  saveCategoryStore(data.categoryStore ?? { categories: [], groups: [] });
+  saveNotes(data.notes ?? []);
+  saveNoteFolders(data.noteFolders ?? []);
+}
+
 // --- Utility ---
 export function getTodayString(): string {
   const d = new Date();
