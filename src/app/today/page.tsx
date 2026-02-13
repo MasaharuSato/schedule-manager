@@ -404,7 +404,7 @@ export default function PlanPage() {
                   <p className="text-base font-bold text-text-primary leading-snug break-words">
                     {entry.title}
                   </p>
-                  <div className="mt-1.5 flex items-center gap-2">
+                  <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                     <span
                       className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium text-white/80"
                       style={{
@@ -415,7 +415,12 @@ export default function PlanPage() {
                     </span>
                     {entry.categoryName && (
                       <span className="inline-block rounded-full bg-surface-highlight px-2.5 py-0.5 text-[11px] text-text-secondary">
-                        {entry.categoryName}
+                        <span className="text-text-secondary/50">カテゴリ:</span> {entry.categoryName}
+                      </span>
+                    )}
+                    {entry.groupName && (
+                      <span className="inline-block rounded-full bg-surface-highlight px-2.5 py-0.5 text-[11px] text-text-secondary">
+                        <span className="text-text-secondary/50">グループ:</span> {entry.groupName}
                       </span>
                     )}
                   </div>
@@ -453,7 +458,7 @@ export default function PlanPage() {
                       <p className="text-base font-bold text-text-secondary line-through leading-snug break-words">
                         {entry.title}
                       </p>
-                      <div className="mt-1.5 flex items-center gap-2">
+                      <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                         <span
                           className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium text-white/60"
                           style={{
@@ -462,6 +467,16 @@ export default function PlanPage() {
                         >
                           {entry.type === "one-off" ? "One-Off" : "Regular"}
                         </span>
+                        {entry.categoryName && (
+                          <span className="inline-block rounded-full bg-surface-highlight px-2.5 py-0.5 text-[11px] text-text-secondary/60">
+                            <span className="text-text-secondary/40">カテゴリ:</span> {entry.categoryName}
+                          </span>
+                        )}
+                        {entry.groupName && (
+                          <span className="inline-block rounded-full bg-surface-highlight px-2.5 py-0.5 text-[11px] text-text-secondary/60">
+                            <span className="text-text-secondary/40">グループ:</span> {entry.groupName}
+                          </span>
+                        )}
                       </div>
                       {entry.note && (
                         <p className="mt-1.5 text-sm text-text-secondary/70 line-through leading-snug break-words whitespace-pre-wrap">
