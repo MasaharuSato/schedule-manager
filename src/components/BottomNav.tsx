@@ -58,7 +58,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border backdrop-blur-xl bg-surface/80 nav-safe-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border backdrop-blur-xl bg-surface/80 nav-safe-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.4)]" style={{ touchAction: "pan-y" }}>
       <div className="mx-auto flex max-w-md">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href;

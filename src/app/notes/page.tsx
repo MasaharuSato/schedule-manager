@@ -241,10 +241,16 @@ const NoteEditor = memo(function NoteEditor({
 
   useEdgeSwipeBack(back);
 
+  useEffect(() => {
+    document.documentElement.scrollLeft = 0;
+    document.body.scrollLeft = 0;
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div
       className="notes-page notes-push-in"
-      style={{ height: "100dvh", display: "flex", flexDirection: "column", overflowX: "hidden", touchAction: "pan-y" }}
+      style={{ position: "fixed", inset: 0, width: "100vw", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", touchAction: "pan-y", overscrollBehavior: "none" }}
     >
       <nav
         className="flex items-center justify-between px-1 py-1 notes-nav-bar backdrop-blur-xl"
@@ -271,7 +277,7 @@ const NoteEditor = memo(function NoteEditor({
 
       <div
         className="notes-scroll flex-1"
-        style={{ overflowY: "auto", overflowX: "hidden", contain: "layout style", touchAction: "pan-y" }}
+        style={{ overflowY: "auto", overflowX: "hidden", contain: "layout style paint", touchAction: "pan-y", overscrollBehaviorX: "none" }}
       >
         <div className="px-4 pt-6 pb-40">
           <input
@@ -287,7 +293,7 @@ const NoteEditor = memo(function NoteEditor({
             defaultValue={initBody}
             placeholder="メモ"
             className="w-full mt-3 text-[17px] leading-[1.47] bg-transparent border-none outline-none resize-none notes-font"
-            style={{ color: "var(--notes-primary)", caretColor: "var(--color-amber)", minHeight: "300px", overflowX: "hidden", wordBreak: "break-word" }}
+            style={{ color: "var(--notes-primary)", caretColor: "var(--color-amber)", minHeight: "300px", overflowX: "hidden", wordBreak: "break-word", overflowWrap: "anywhere" }}
           />
         </div>
       </div>
