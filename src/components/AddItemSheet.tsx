@@ -1,10 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { TaskType, Category, Group } from "@/lib/storage";
 import BottomSheet from "./BottomSheet";
 
 type AddMode = "category" | "group" | "task";
+
+interface FlatGroupOption {
+  id: string;
+  label: string;
+  depth: number;
+}
+
+function buildFlatGroupOptions(
+  groups: Group[],
+  categoryId: string,
+  parentId?: string,
+  depth: number = 0
+): FlatGroupOption[] {
+  const result: FlatGroupOption[] = [];
+  const children = groups
+    .filter((g) => g.categoryId === categoryId && (g.parentGroupId ?? undefined) === parentId)
+    .sort((a, b) => a.order - b.order);
+  for (const g of children) {
+    const prefix = depth > 0 ? "─ ".repeat(depth) : "";
+    result.push({ id: g.id, label: `${prefix}${g.name}`, depth });
+    result.push(...buildFlatGroupOptions(groups, categoryId, g.id, depth + 1));
+  }
+  return result;
+}
 
 interface AddItemSheetProps {
   isOpen: boolean;
@@ -12,7 +36,7 @@ interface AddItemSheetProps {
   categories: Category[];
   groups: Group[];
   onAddCategory: (name: string) => void;
-  onAddGroup: (name: string, categoryId: string) => void;
+  onAddGroup: (name: string, categoryId: string, parentGroupId?: string) => void;
   onAddTask: (
     title: string,
     type: TaskType,
@@ -21,6 +45,7 @@ interface AddItemSheetProps {
   ) => void;
   defaultCategoryId?: string;
   defaultGroupId?: string;
+  defaultParentGroupId?: string;
   defaultMode?: AddMode;
 }
 
@@ -34,6 +59,7 @@ export default function AddItemSheet({
   onAddTask,
   defaultCategoryId,
   defaultGroupId,
+  defaultParentGroupId,
   defaultMode = "task",
 }: AddItemSheetProps) {
   const [mode, setMode] = useState<AddMode>(defaultMode);
@@ -41,6 +67,7 @@ export default function AddItemSheet({
   const [taskType, setTaskType] = useState<TaskType>("regular");
   const [categoryId, setCategoryId] = useState(defaultCategoryId ?? "");
   const [groupId, setGroupId] = useState(defaultGroupId ?? "");
+  const [parentGroupId, setParentGroupId] = useState(defaultParentGroupId ?? "");
 
   // Sync defaults when sheet opens
   useEffect(() => {
@@ -48,13 +75,15 @@ export default function AddItemSheet({
       setMode(defaultMode);
       setCategoryId(defaultCategoryId ?? "");
       setGroupId(defaultGroupId ?? "");
+      setParentGroupId(defaultParentGroupId ?? "");
       setName("");
     }
-  }, [isOpen, defaultMode, defaultCategoryId, defaultGroupId]);
+  }, [isOpen, defaultMode, defaultCategoryId, defaultGroupId, defaultParentGroupId]);
 
-  const filteredGroups = categoryId
-    ? groups.filter((g) => g.categoryId === categoryId)
-    : [];
+  const groupOptions = useMemo(
+    () => (categoryId ? buildFlatGroupOptions(groups, categoryId) : []),
+    [groups, categoryId]
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +94,7 @@ export default function AddItemSheet({
       onAddCategory(trimmed);
     } else if (mode === "group") {
       if (!categoryId) return;
-      onAddGroup(trimmed, categoryId);
+      onAddGroup(trimmed, categoryId, parentGroupId || undefined);
     } else {
       onAddTask(
         trimmed,
@@ -77,12 +106,14 @@ export default function AddItemSheet({
 
     setName("");
     setGroupId("");
+    setParentGroupId("");
     onClose();
   };
 
   const handleClose = () => {
     setName("");
     setGroupId("");
+    setParentGroupId("");
     onClose();
   };
 
@@ -140,6 +171,7 @@ export default function AddItemSheet({
               onChange={(e) => {
                 setCategoryId(e.target.value);
                 setGroupId("");
+                setParentGroupId("");
               }}
               className="w-full rounded-xl border border-border bg-bg-secondary px-4 py-3 text-base text-text-primary focus:border-amber focus:outline-none [color-scheme:dark]"
             >
@@ -153,8 +185,29 @@ export default function AddItemSheet({
           </div>
         )}
 
+        {/* Parent group picker (for group mode - to create sub-groups) */}
+        {mode === "group" && categoryId && groupOptions.length > 0 && (
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5">
+              親グループ
+            </label>
+            <select
+              value={parentGroupId}
+              onChange={(e) => setParentGroupId(e.target.value)}
+              className="w-full rounded-xl border border-border bg-bg-secondary px-4 py-3 text-base text-text-primary focus:border-amber focus:outline-none [color-scheme:dark]"
+            >
+              <option value="">なし（トップレベル）</option>
+              {groupOptions.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* Group picker (for task mode only) */}
-        {mode === "task" && categoryId && filteredGroups.length > 0 && (
+        {mode === "task" && categoryId && groupOptions.length > 0 && (
           <div>
             <label className="block text-xs font-medium text-text-secondary mb-1.5">
               グループ
@@ -165,9 +218,9 @@ export default function AddItemSheet({
               className="w-full rounded-xl border border-border bg-bg-secondary px-4 py-3 text-base text-text-primary focus:border-amber focus:outline-none [color-scheme:dark]"
             >
               <option value="">グループなし</option>
-              {filteredGroups.map((g) => (
+              {groupOptions.map((g) => (
                 <option key={g.id} value={g.id}>
-                  {g.name}
+                  {g.label}
                 </option>
               ))}
             </select>

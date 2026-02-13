@@ -18,6 +18,7 @@ export interface Group {
   id: string;
   name: string;
   categoryId: string;
+  parentGroupId?: string;
   order: number;
   createdAt: string;
 }

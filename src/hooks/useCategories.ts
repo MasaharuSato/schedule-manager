@@ -9,6 +9,16 @@ import {
   saveCategoryStore,
 } from "@/lib/storage";
 
+function getDescendantGroupIds(groupId: string, allGroups: Group[]): string[] {
+  const ids: string[] = [];
+  const children = allGroups.filter((g) => g.parentGroupId === groupId);
+  for (const child of children) {
+    ids.push(child.id);
+    ids.push(...getDescendantGroupIds(child.id, allGroups));
+  }
+  return ids;
+}
+
 export function useCategories() {
   const [store, setStore] = useState<CategoryStore>({
     categories: [],
@@ -60,11 +70,12 @@ export function useCategories() {
   }, []);
 
   // --- Group CRUD ---
-  const addGroup = useCallback((name: string, categoryId: string) => {
+  const addGroup = useCallback((name: string, categoryId: string, parentGroupId?: string) => {
     const group: Group = {
       id: crypto.randomUUID(),
       name,
       categoryId,
+      parentGroupId: parentGroupId || undefined,
       order: Date.now(),
       createdAt: new Date().toISOString(),
     };
@@ -85,10 +96,14 @@ export function useCategories() {
   }, []);
 
   const deleteGroup = useCallback((id: string) => {
-    setStore((prev) => ({
-      ...prev,
-      groups: prev.groups.filter((g) => g.id !== id),
-    }));
+    setStore((prev) => {
+      const descendantIds = getDescendantGroupIds(id, prev.groups);
+      const idsToRemove = new Set([id, ...descendantIds]);
+      return {
+        ...prev,
+        groups: prev.groups.filter((g) => !idsToRemove.has(g.id)),
+      };
+    });
   }, []);
 
   // --- Queries ---
@@ -105,8 +120,21 @@ export function useCategories() {
   const getGroupsForCategory = useCallback(
     (categoryId: string) =>
       store.groups
-        .filter((g) => g.categoryId === categoryId)
+        .filter((g) => g.categoryId === categoryId && !g.parentGroupId)
         .sort((a, b) => a.order - b.order),
+    [store.groups]
+  );
+
+  const getSubGroups = useCallback(
+    (parentGroupId: string) =>
+      store.groups
+        .filter((g) => g.parentGroupId === parentGroupId)
+        .sort((a, b) => a.order - b.order),
+    [store.groups]
+  );
+
+  const getDescendantIds = useCallback(
+    (groupId: string) => getDescendantGroupIds(groupId, store.groups),
     [store.groups]
   );
 
@@ -127,5 +155,7 @@ export function useCategories() {
     getCategory,
     getGroup,
     getGroupsForCategory,
+    getSubGroups,
+    getDescendantIds,
   };
 }

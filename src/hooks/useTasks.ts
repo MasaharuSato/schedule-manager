@@ -70,10 +70,11 @@ export function useTasks() {
     );
   }, []);
 
-  const orphanByGroup = useCallback((groupId: string) => {
+  const orphanByGroup = useCallback((groupId: string, descendantIds?: string[]) => {
+    const allIds = new Set([groupId, ...(descendantIds ?? [])]);
     setTasks((prev) =>
       prev.map((t) =>
-        t.groupId === groupId ? { ...t, groupId: undefined } : t
+        t.groupId && allIds.has(t.groupId) ? { ...t, groupId: undefined } : t
       )
     );
   }, []);

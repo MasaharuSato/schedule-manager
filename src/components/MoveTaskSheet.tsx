@@ -1,8 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Task, Category, Group } from "@/lib/storage";
 import BottomSheet from "./BottomSheet";
+
+interface FlatGroupOption {
+  id: string;
+  label: string;
+}
+
+function buildFlatGroupOptions(
+  groups: Group[],
+  categoryId: string,
+  parentId?: string,
+  depth: number = 0
+): FlatGroupOption[] {
+  const result: FlatGroupOption[] = [];
+  const children = groups
+    .filter((g) => g.categoryId === categoryId && (g.parentGroupId ?? undefined) === parentId)
+    .sort((a, b) => a.order - b.order);
+  for (const g of children) {
+    const prefix = depth > 0 ? "─ ".repeat(depth) : "";
+    result.push({ id: g.id, label: `${prefix}${g.name}` });
+    result.push(...buildFlatGroupOptions(groups, categoryId, g.id, depth + 1));
+  }
+  return result;
+}
 
 interface MoveTaskSheetProps {
   isOpen: boolean;
@@ -24,9 +47,10 @@ export default function MoveTaskSheet({
   const [categoryId, setCategoryId] = useState(task?.categoryId ?? "");
   const [groupId, setGroupId] = useState(task?.groupId ?? "");
 
-  const filteredGroups = categoryId
-    ? groups.filter((g) => g.categoryId === categoryId)
-    : [];
+  const groupOptions = useMemo(
+    () => (categoryId ? buildFlatGroupOptions(groups, categoryId) : []),
+    [groups, categoryId]
+  );
 
   const handleMove = () => {
     if (!task) return;
@@ -67,7 +91,7 @@ export default function MoveTaskSheet({
           </select>
         </div>
 
-        {categoryId && filteredGroups.length > 0 && (
+        {categoryId && groupOptions.length > 0 && (
           <div>
             <label className="block text-xs font-medium text-text-secondary mb-1.5">
               グループ
@@ -78,9 +102,9 @@ export default function MoveTaskSheet({
               className="w-full rounded-xl border border-border bg-bg-secondary px-4 py-3 text-base text-text-primary focus:border-amber focus:outline-none [color-scheme:dark]"
             >
               <option value="">グループなし</option>
-              {filteredGroups.map((g) => (
+              {groupOptions.map((g) => (
                 <option key={g.id} value={g.id}>
-                  {g.name}
+                  {g.label}
                 </option>
               ))}
             </select>

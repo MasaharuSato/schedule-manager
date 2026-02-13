@@ -28,11 +28,14 @@ export default function TaskListPage() {
     addGroup,
     deleteCategory,
     deleteGroup,
+    getSubGroups,
+    getDescendantIds,
   } = useCategories();
 
   const [showAdd, setShowAdd] = useState(false);
   const [addDefaultCatId, setAddDefaultCatId] = useState<string | undefined>();
   const [addDefaultGroupId, setAddDefaultGroupId] = useState<string | undefined>();
+  const [addDefaultParentGroupId, setAddDefaultParentGroupId] = useState<string | undefined>();
   const [addDefaultMode, setAddDefaultMode] = useState<"task" | "category" | "group">("task");
   const [moveTarget, setMoveTarget] = useState<Task | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set(["__uncategorized"]));
@@ -77,10 +80,11 @@ export default function TaskListPage() {
   }, [getNonEmptyIds]);
 
   const openAdd = useCallback(
-    (mode: "task" | "category" | "group", catId?: string, grpId?: string) => {
+    (mode: "task" | "category" | "group", catId?: string, grpId?: string, parentGrpId?: string) => {
       setAddDefaultMode(mode);
       setAddDefaultCatId(catId);
       setAddDefaultGroupId(grpId);
+      setAddDefaultParentGroupId(parentGrpId);
       setShowAdd(true);
     },
     []
@@ -96,10 +100,11 @@ export default function TaskListPage() {
 
   const handleDeleteGroup = useCallback(
     (grpId: string) => {
-      orphanByGroup(grpId);
+      const descendantIds = getDescendantIds(grpId);
+      orphanByGroup(grpId, descendantIds);
       deleteGroup(grpId);
     },
-    [orphanByGroup, deleteGroup]
+    [orphanByGroup, deleteGroup, getDescendantIds]
   );
 
   if (!tasksLoaded || !catsLoaded) {
@@ -207,9 +212,12 @@ export default function TaskListPage() {
     groupId: string,
     groupName: string,
     groupTasks: Task[],
-    catId: string
+    catId: string,
+    depth: number = 0
   ) => {
     const isExpanded = expanded.has(groupId);
+    const subGroups = getSubGroups(groupId);
+    const directTasks = groupTasks.filter((t) => t.groupId === groupId);
     return (
       <div key={groupId} className="ml-3">
         <div className="mx-4 h-[0.5px] rounded-full bg-border/20" />
@@ -236,7 +244,7 @@ export default function TaskListPage() {
             {groupName}
           </span>
           <span className="text-sm text-text-secondary/60">
-            {groupTasks.length}
+            {directTasks.length}
           </span>
           <button
             onClick={(e) => {
@@ -264,21 +272,41 @@ export default function TaskListPage() {
         <div
           className="overflow-hidden transition-all duration-300 ease-in-out"
           style={{
-            maxHeight: isExpanded ? "2000px" : "0px",
+            maxHeight: isExpanded ? "5000px" : "0px",
             opacity: isExpanded ? 1 : 0,
           }}
         >
           <div className="flex flex-col gap-2.5 pl-2 pb-3">
-            {groupTasks.map((t, i) => renderTaskCard(t, i))}
-            <button
-              onClick={() => openAdd("task", catId, groupId)}
-              className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-text-secondary/60 hover:text-text-secondary"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              ミッションを追加
-            </button>
+            {/* Sub-groups (recursive) */}
+            {subGroups.map((sg) => {
+              const sgTasks = tasks.filter((t) => t.groupId === sg.id);
+              return renderGroupSection(sg.id, sg.name, sgTasks, catId, depth + 1);
+            })}
+
+            {/* Direct tasks in this group */}
+            {directTasks.map((t, i) => renderTaskCard(t, i))}
+
+            {/* Add buttons */}
+            <div className="flex gap-2 pl-1">
+              <button
+                onClick={() => openAdd("task", catId, groupId)}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-text-secondary/60 hover:text-text-secondary"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                ミッション
+              </button>
+              <button
+                onClick={() => openAdd("group", catId, undefined, groupId)}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-text-secondary/60 hover:text-text-secondary"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                サブグループ
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -288,7 +316,7 @@ export default function TaskListPage() {
   const renderCategorySection = (catId: string, catName: string) => {
     const isExpanded = expanded.has(catId);
     const catGroups = groups
-      .filter((g) => g.categoryId === catId)
+      .filter((g) => g.categoryId === catId && !g.parentGroupId)
       .sort((a, b) => a.order - b.order);
     const catTasks = tasks.filter((t) => t.categoryId === catId);
     const directTasks = catTasks.filter((t) => !t.groupId);
@@ -549,6 +577,7 @@ export default function TaskListPage() {
         onAddTask={addTask}
         defaultCategoryId={addDefaultCatId}
         defaultGroupId={addDefaultGroupId}
+        defaultParentGroupId={addDefaultParentGroupId}
         defaultMode={addDefaultMode}
       />
       <MoveTaskSheet
