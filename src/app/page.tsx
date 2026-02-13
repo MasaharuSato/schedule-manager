@@ -48,6 +48,28 @@ export default function TaskListPage() {
     });
   }, []);
 
+  const allExpanded = (() => {
+    const allIds = [
+      ...categories.map((c) => c.id),
+      ...groups.map((g) => g.id),
+      "__uncategorized",
+    ];
+    return allIds.length > 0 && allIds.every((id) => expanded.has(id));
+  })();
+
+  const toggleAll = useCallback(() => {
+    setExpanded((prev) => {
+      const allIds = [
+        ...categories.map((c) => c.id),
+        ...groups.map((g) => g.id),
+        "__uncategorized",
+      ];
+      const allOpen = allIds.every((id) => prev.has(id));
+      if (allOpen) return new Set<string>();
+      return new Set(allIds);
+    });
+  }, [categories, groups]);
+
   const openAdd = useCallback(
     (mode: "task" | "category" | "group", catId?: string, grpId?: string) => {
       setAddDefaultMode(mode);
@@ -115,7 +137,7 @@ export default function TaskListPage() {
           }
         >
           <div
-            className="rounded-2xl px-4 py-3.5 shadow-lg shadow-black/30"
+            className="rounded-2xl px-5 py-4 shadow-lg shadow-black/30"
             style={{ backgroundColor: bgMuted }}
           >
             {isEditing ? (
@@ -132,7 +154,7 @@ export default function TaskListPage() {
                     }
                     if (e.key === "Escape") setEditingId(null);
                   }}
-                  className="flex-1 rounded-lg border border-border bg-bg-secondary px-3 py-2 text-base text-text-primary focus:border-amber focus:outline-none"
+                  className="flex-1 rounded-lg border border-border bg-bg-secondary px-3 py-2.5 text-lg text-text-primary focus:border-amber focus:outline-none"
                   autoFocus
                 />
                 <button
@@ -141,7 +163,7 @@ export default function TaskListPage() {
                     if (trimmed) updateTask(task.id, { title: trimmed });
                     setEditingId(null);
                   }}
-                  className="text-sm font-medium text-amber"
+                  className="text-base font-medium text-amber"
                 >
                   保存
                 </button>
@@ -155,12 +177,12 @@ export default function TaskListPage() {
                 }}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-base font-bold text-text-primary leading-snug break-words">
+                  <p className="text-lg font-bold text-text-primary leading-snug break-words">
                     {task.title}
                   </p>
-                  <div className="mt-1 flex items-center gap-2">
+                  <div className="mt-1.5 flex items-center gap-2">
                     <span
-                      className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium text-white/80"
+                      className="inline-block rounded-full px-3 py-0.5 text-xs font-medium text-white/80"
                       style={{ backgroundColor: `${color}40` }}
                     >
                       {task.type === "one-off" ? "One-Off" : "Regular"}
@@ -186,11 +208,11 @@ export default function TaskListPage() {
       <div key={groupId} className="ml-3">
         <button
           onClick={() => toggleExpand(groupId)}
-          className="flex w-full items-center gap-2 px-3 py-2 text-left"
+          className="flex w-full items-center gap-2.5 px-3 py-3 text-left"
         >
           <svg
-            width="16"
-            height="16"
+            width="20"
+            height="20"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -203,10 +225,10 @@ export default function TaskListPage() {
           >
             <polyline points="9 18 15 12 9 6" />
           </svg>
-          <span className="text-sm font-semibold text-text-secondary">
+          <span className="text-base font-semibold text-text-secondary">
             {groupName}
           </span>
-          <span className="text-xs text-text-secondary/60">
+          <span className="text-sm text-text-secondary/60">
             {groupTasks.length}
           </span>
           <button
@@ -220,12 +242,12 @@ export default function TaskListPage() {
                 setTimeout(() => setConfirmDeleteId(null), 3000);
               }
             }}
-            className="ml-auto text-text-secondary/40 hover:text-red-400 p-1"
+            className="ml-auto text-text-secondary/40 hover:text-red-400 p-1.5"
           >
             {confirmDeleteId === groupId ? (
-              <span className="text-xs text-red-400">削除</span>
+              <span className="text-sm text-red-400">削除</span>
             ) : (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
               </svg>
             )}
@@ -239,11 +261,11 @@ export default function TaskListPage() {
             opacity: isExpanded ? 1 : 0,
           }}
         >
-          <div className="flex flex-col gap-2 pl-2 pb-2">
+          <div className="flex flex-col gap-2.5 pl-2 pb-3">
             {groupTasks.map((t, i) => renderTaskCard(t, i))}
             <button
               onClick={() => openAdd("task", catId, groupId)}
-              className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-text-secondary/60 hover:text-text-secondary"
+              className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-text-secondary/60 hover:text-text-secondary"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -269,11 +291,11 @@ export default function TaskListPage() {
       <div key={catId} className="animate-slide-up">
         <button
           onClick={() => toggleExpand(catId)}
-          className="flex w-full items-center gap-3 px-4 py-3 text-left"
+          className="flex w-full items-center gap-3 px-4 py-4 text-left"
         >
           <svg
-            width="18"
-            height="18"
+            width="22"
+            height="22"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -286,10 +308,10 @@ export default function TaskListPage() {
           >
             <polyline points="9 18 15 12 9 6" />
           </svg>
-          <span className="text-base font-bold text-text-primary tracking-tight">
+          <span className="text-lg font-bold text-text-primary tracking-tight">
             {catName}
           </span>
-          <span className="rounded-full bg-surface-highlight px-2 py-0.5 text-xs text-text-secondary">
+          <span className="rounded-full bg-surface-highlight px-2.5 py-0.5 text-sm text-text-secondary">
             {totalCount}
           </span>
           <button
@@ -303,12 +325,12 @@ export default function TaskListPage() {
                 setTimeout(() => setConfirmDeleteId(null), 3000);
               }
             }}
-            className="ml-auto text-text-secondary/40 hover:text-red-400 p-1"
+            className="ml-auto text-text-secondary/40 hover:text-red-400 p-1.5"
           >
             {confirmDeleteId === catId ? (
-              <span className="text-xs text-red-400">削除</span>
+              <span className="text-sm text-red-400">削除</span>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
               </svg>
             )}
@@ -322,7 +344,7 @@ export default function TaskListPage() {
             opacity: isExpanded ? 1 : 0,
           }}
         >
-          <div className="flex flex-col gap-2 px-3 pb-3">
+          <div className="flex flex-col gap-2.5 px-3 pb-4">
             {/* Groups */}
             {catGroups.map((g) => {
               const grpTasks = tasks.filter((t) => t.groupId === g.id);
@@ -333,21 +355,21 @@ export default function TaskListPage() {
             {directTasks.map((t, i) => renderTaskCard(t, i))}
 
             {/* Add buttons */}
-            <div className="flex gap-2 pl-2 pt-1">
+            <div className="flex gap-2.5 pl-2 pt-1">
               <button
                 onClick={() => openAdd("task", catId)}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-text-secondary/60 hover:text-text-secondary bg-surface-highlight/50"
+                className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm text-text-secondary/60 hover:text-text-secondary bg-surface-highlight/50"
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
                 ミッション
               </button>
               <button
                 onClick={() => openAdd("group", catId)}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-text-secondary/60 hover:text-text-secondary bg-surface-highlight/50"
+                className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm text-text-secondary/60 hover:text-text-secondary bg-surface-highlight/50"
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
                 グループ
@@ -372,15 +394,40 @@ export default function TaskListPage() {
               {tasks.length}件のミッション
             </p>
           </div>
-          <button
-            onClick={() => openAdd("task")}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-amber shadow-lg shadow-amber/20"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleAll}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-highlight"
+              title={allExpanded ? "すべて閉じる" : "すべて開く"}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text-secondary">
+                {allExpanded ? (
+                  <>
+                    <polyline points="4 14 10 14 10 20" />
+                    <polyline points="20 10 14 10 14 4" />
+                    <line x1="14" y1="10" x2="21" y2="3" />
+                    <line x1="3" y1="21" x2="10" y2="14" />
+                  </>
+                ) : (
+                  <>
+                    <polyline points="15 3 21 3 21 9" />
+                    <polyline points="9 21 3 21 3 15" />
+                    <line x1="21" y1="3" x2="14" y2="10" />
+                    <line x1="3" y1="21" x2="10" y2="14" />
+                  </>
+                )}
+              </svg>
+            </button>
+            <button
+              onClick={() => openAdd("task")}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-amber shadow-lg shadow-amber/20"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -418,11 +465,11 @@ export default function TaskListPage() {
             <div>
               <button
                 onClick={() => toggleExpand("__uncategorized")}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left"
+                className="flex w-full items-center gap-3 px-4 py-4 text-left"
               >
                 <svg
-                  width="18"
-                  height="18"
+                  width="22"
+                  height="22"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -435,10 +482,10 @@ export default function TaskListPage() {
                 >
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
-                <span className="text-base font-bold text-text-secondary tracking-tight">
+                <span className="text-lg font-bold text-text-secondary tracking-tight">
                   未分類
                 </span>
-                <span className="rounded-full bg-surface-highlight px-2 py-0.5 text-xs text-text-secondary">
+                <span className="rounded-full bg-surface-highlight px-2.5 py-0.5 text-sm text-text-secondary">
                   {uncategorized.length}
                 </span>
               </button>
@@ -450,7 +497,7 @@ export default function TaskListPage() {
                   opacity: expanded.has("__uncategorized") ? 1 : 0,
                 }}
               >
-                <div className="flex flex-col gap-2 px-3 pb-3">
+                <div className="flex flex-col gap-2.5 px-3 pb-4">
                   {uncategorized.map((t, i) => renderTaskCard(t, i))}
                 </div>
               </div>
