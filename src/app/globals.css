@@ -159,21 +159,45 @@ body {
 
 .notes-nav-bar { background: var(--notes-nav-bg); }
 .notes-search-bg { background: var(--notes-search-bg); }
-.notes-cell-bg { background: var(--notes-bg); }
 .notes-separator-line { background: var(--notes-separator); }
 
-.notes-text-primary { color: var(--notes-primary); }
-.notes-text-secondary { color: var(--notes-secondary); }
-.notes-text-tertiary { color: var(--notes-tertiary); }
-.notes-text-quaternary { color: var(--notes-quaternary); }
+.notes-cell {
+  background: var(--notes-bg);
+}
+.notes-cell:active {
+  background: var(--notes-cell-active);
+}
 
 .notes-page input::placeholder,
 .notes-page textarea::placeholder {
   color: var(--notes-quaternary);
 }
 
-.notes-cell-bg:active {
-  background: var(--notes-cell-active);
+/* Notes scroll — GPU-promoted layer, inertial */
+.notes-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* iOS push/pop transitions — 220ms ease-out, transform-only */
+@keyframes notesPushIn {
+  from { transform: translate3d(100%, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes notesPopIn {
+  from { transform: translate3d(-20%, 0, 0); opacity: 0.5; }
+  to { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+
+.notes-push-in {
+  animation: notesPushIn 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  will-change: transform;
+}
+.notes-pop-in {
+  animation: notesPopIn 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  will-change: transform, opacity;
 }
 
 /* Header gradient */
