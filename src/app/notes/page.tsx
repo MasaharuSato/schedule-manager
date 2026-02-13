@@ -324,6 +324,7 @@ const NoteCell = memo(function NoteCell({
   onMove,
 }: CellProps) {
   const contentEl = useRef<HTMLDivElement>(null);
+  const actionsEl = useRef<HTMLDivElement>(null);
   const sx = useRef(0);
   const sy = useRef(0);
   const off = useRef(0);
@@ -356,6 +357,8 @@ const NoteCell = memo(function NoteCell({
       if (dir.current !== "h") return;
 
       didSwipe.current = true;
+      /* Show action buttons as soon as swipe starts */
+      if (actionsEl.current) actionsEl.current.style.visibility = "visible";
       const base = revealed.current ? -180 : 0;
       off.current = Math.min(0, Math.max(-196, base + dx));
       c.style.transform = `translate3d(${off.current}px,0,0)`;
@@ -363,12 +366,32 @@ const NoteCell = memo(function NoteCell({
 
     const onEnd = () => {
       c.style.transition = "transform .28s cubic-bezier(.25,.46,.45,.94)";
-      if (off.current < -60) {
-        off.current = -180;
-        revealed.current = true;
+      if (revealed.current) {
+        /* When open: easy to close — just 40px right movement */
+        if (off.current > -140) {
+          off.current = 0;
+          revealed.current = false;
+          /* Hide actions after close animation */
+          setTimeout(() => {
+            if (actionsEl.current && !revealed.current)
+              actionsEl.current.style.visibility = "hidden";
+          }, 300);
+        } else {
+          off.current = -180;
+        }
       } else {
-        off.current = 0;
-        revealed.current = false;
+        /* When closed: open if past 60px */
+        if (off.current < -60) {
+          off.current = -180;
+          revealed.current = true;
+        } else {
+          off.current = 0;
+          /* Hide actions */
+          setTimeout(() => {
+            if (actionsEl.current && !revealed.current)
+              actionsEl.current.style.visibility = "hidden";
+          }, 300);
+        }
       }
       c.style.transform = `translate3d(${off.current}px,0,0)`;
     };
@@ -391,6 +414,9 @@ const NoteCell = memo(function NoteCell({
       c.style.transform = "translate3d(0,0,0)";
       off.current = 0;
       revealed.current = false;
+      setTimeout(() => {
+        if (actionsEl.current) actionsEl.current.style.visibility = "hidden";
+      }, 300);
     } else {
       onOpen(id);
     }
@@ -402,12 +428,19 @@ const NoteCell = memo(function NoteCell({
     c.style.transform = "translate3d(0,0,0)";
     off.current = 0;
     revealed.current = false;
+    setTimeout(() => {
+      if (actionsEl.current) actionsEl.current.style.visibility = "hidden";
+    }, 300);
   };
 
   return (
     <div className="relative overflow-hidden rounded-xl mb-2.5" style={{ background: "var(--notes-surface)" }}>
-      {/* Action buttons behind — pin, move, delete */}
-      <div className="absolute right-0 top-0 bottom-0 flex items-stretch">
+      {/* Action buttons behind — hidden until swipe starts */}
+      <div
+        ref={actionsEl}
+        className="absolute right-0 top-0 bottom-0 flex items-stretch"
+        style={{ visibility: "hidden" }}
+      >
         <button
           onClick={() => { onPin(id); closeSwipe(); }}
           className="w-[60px] flex flex-col items-center justify-center gap-1 text-white text-[11px] font-medium notes-font"
@@ -449,7 +482,7 @@ const NoteCell = memo(function NoteCell({
       <div
         ref={contentEl}
         onClick={handleClick}
-        className="relative"
+        className="relative rounded-xl"
         style={{
           transform: "translate3d(0,0,0)",
           willChange: "transform",
@@ -510,6 +543,7 @@ const FolderCell = memo(function FolderCell({
   onRename,
 }: FolderCellProps) {
   const contentEl = useRef<HTMLDivElement>(null);
+  const actionsEl = useRef<HTMLDivElement>(null);
   const sx = useRef(0);
   const sy = useRef(0);
   const off = useRef(0);
@@ -537,6 +571,7 @@ const FolderCell = memo(function FolderCell({
       }
       if (dirRef.current !== "h") return;
       didSwipe.current = true;
+      if (actionsEl.current) actionsEl.current.style.visibility = "visible";
       const base = revealed.current ? -120 : 0;
       off.current = Math.min(0, Math.max(-136, base + dx));
       c.style.transform = `translate3d(${off.current}px,0,0)`;
@@ -544,8 +579,29 @@ const FolderCell = memo(function FolderCell({
 
     const onEnd = () => {
       c.style.transition = "transform .28s cubic-bezier(.25,.46,.45,.94)";
-      if (off.current < -50) { off.current = -120; revealed.current = true; }
-      else { off.current = 0; revealed.current = false; }
+      if (revealed.current) {
+        if (off.current > -80) {
+          off.current = 0;
+          revealed.current = false;
+          setTimeout(() => {
+            if (actionsEl.current && !revealed.current)
+              actionsEl.current.style.visibility = "hidden";
+          }, 300);
+        } else {
+          off.current = -120;
+        }
+      } else {
+        if (off.current < -50) {
+          off.current = -120;
+          revealed.current = true;
+        } else {
+          off.current = 0;
+          setTimeout(() => {
+            if (actionsEl.current && !revealed.current)
+              actionsEl.current.style.visibility = "hidden";
+          }, 300);
+        }
+      }
       c.style.transform = `translate3d(${off.current}px,0,0)`;
     };
 
@@ -567,6 +623,9 @@ const FolderCell = memo(function FolderCell({
       c.style.transform = "translate3d(0,0,0)";
       off.current = 0;
       revealed.current = false;
+      setTimeout(() => {
+        if (actionsEl.current) actionsEl.current.style.visibility = "hidden";
+      }, 300);
     } else {
       onOpen(folder.id);
     }
@@ -578,12 +637,19 @@ const FolderCell = memo(function FolderCell({
     c.style.transform = "translate3d(0,0,0)";
     off.current = 0;
     revealed.current = false;
+    setTimeout(() => {
+      if (actionsEl.current) actionsEl.current.style.visibility = "hidden";
+    }, 300);
   };
 
   return (
     <div className="relative overflow-hidden rounded-xl mb-2.5" style={{ background: "var(--notes-surface)" }}>
-      {/* Actions */}
-      <div className="absolute right-0 top-0 bottom-0 flex items-stretch">
+      {/* Actions — hidden until swipe starts */}
+      <div
+        ref={actionsEl}
+        className="absolute right-0 top-0 bottom-0 flex items-stretch"
+        style={{ visibility: "hidden" }}
+      >
         <button
           onClick={() => { onRename(folder.id); closeSwipe(); }}
           className="w-[60px] flex flex-col items-center justify-center gap-1 text-white text-[11px] font-medium notes-font"
@@ -612,7 +678,7 @@ const FolderCell = memo(function FolderCell({
       <div
         ref={contentEl}
         onClick={handleClick}
-        className="relative"
+        className="relative rounded-xl"
         style={{ transform: "translate3d(0,0,0)", willChange: "transform", background: "var(--notes-surface)" }}
       >
         <div className="py-4 px-4 flex items-center gap-3">
