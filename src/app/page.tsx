@@ -211,7 +211,8 @@ export default function TaskListPage() {
   ) => {
     const isExpanded = expanded.has(groupId);
     return (
-      <div key={groupId} className="ml-3 border-t border-border/50">
+      <div key={groupId} className="ml-3">
+        <div className="mx-4 h-[0.5px] rounded-full bg-border/20" />
         <button
           onClick={() => toggleExpand(groupId)}
           className="flex w-full items-center gap-2.5 px-3 py-3 text-left"
@@ -294,7 +295,8 @@ export default function TaskListPage() {
     const totalCount = catTasks.length;
 
     return (
-      <div key={catId} className="animate-slide-up border-t border-border">
+      <div key={catId} className="animate-slide-up">
+        <div className="mx-5 h-[0.5px] rounded-full bg-border/30" />
         <button
           onClick={() => toggleExpand(catId)}
           className="flex w-full items-center gap-3 px-4 py-4 text-left"
@@ -479,7 +481,8 @@ export default function TaskListPage() {
 
           {/* Uncategorized section */}
           {uncategorized.length > 0 && (
-            <div className="border-t border-border">
+            <div>
+              <div className="mx-5 h-[0.5px] rounded-full bg-border/30" />
               <button
                 onClick={() => toggleExpand("__uncategorized")}
                 className="flex w-full items-center gap-3 px-4 py-4 text-left"
