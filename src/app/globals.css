@@ -134,6 +134,48 @@ body {
   animation: checkPop 0.2s ease-out;
 }
 
+/* ── Apple Notes tokens (dark mode) ── */
+:root {
+  --notes-bg: #000000;
+  --notes-surface: #1C1C1E;
+  --notes-cell-active: rgba(255, 255, 255, 0.05);
+  --notes-separator: rgba(255, 255, 255, 0.08);
+  --notes-primary: #FFFFFF;
+  --notes-secondary: #8E8E93;
+  --notes-tertiary: #636366;
+  --notes-quaternary: rgba(255, 255, 255, 0.18);
+  --notes-search-bg: rgba(255, 255, 255, 0.08);
+  --notes-nav-bg: rgba(0, 0, 0, 0.72);
+}
+
+.notes-page {
+  background: var(--notes-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Helvetica Neue", sans-serif;
+}
+
+.notes-font {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Helvetica Neue", sans-serif;
+}
+
+.notes-nav-bar { background: var(--notes-nav-bg); }
+.notes-search-bg { background: var(--notes-search-bg); }
+.notes-cell-bg { background: var(--notes-bg); }
+.notes-separator-line { background: var(--notes-separator); }
+
+.notes-text-primary { color: var(--notes-primary); }
+.notes-text-secondary { color: var(--notes-secondary); }
+.notes-text-tertiary { color: var(--notes-tertiary); }
+.notes-text-quaternary { color: var(--notes-quaternary); }
+
+.notes-page input::placeholder,
+.notes-page textarea::placeholder {
+  color: var(--notes-quaternary);
+}
+
+.notes-cell-bg:active {
+  background: var(--notes-cell-active);
+}
+
 /* Header gradient */
 .header-gradient {
   background: linear-gradient(

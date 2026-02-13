@@ -1,6 +1,7 @@
 const TASKS_KEY = "schedule-manager-tasks";
 const PLANS_KEY = "schedule-manager-plans";
 const CATEGORIES_KEY = "schedule-manager-categories";
+const NOTES_KEY = "schedule-manager-notes";
 
 export type TaskType = "one-off" | "regular";
 
@@ -104,6 +105,30 @@ export function loadCategoryStore(): CategoryStore {
 export function saveCategoryStore(store: CategoryStore): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(CATEGORIES_KEY, JSON.stringify(store));
+}
+
+// --- Notes ---
+export interface Note {
+  id: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export function loadNotes(): Note[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(NOTES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveNotes(notes: Note[]): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
 }
 
 // --- Utility ---
