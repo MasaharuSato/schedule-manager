@@ -80,6 +80,30 @@ export const NoteEditor = memo(function NoteEditor({
 
     stick.current = true;
     let wasOverflowing = sEl.scrollHeight > sEl.clientHeight;
+    let prevLen = bEl.value.length;
+
+    /* ── Reusable mirror div (avoid repeated DOM create/remove) ── */
+    const mirror = document.createElement("div");
+    mirror.style.cssText =
+      "position:absolute;top:-9999px;left:-9999px;visibility:hidden;pointer-events:none;" +
+      "white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;padding:0;border:none;";
+    document.body.appendChild(mirror);
+    let cachedFont = "";
+    let cachedLineH = "";
+    let cachedLetterSp = "";
+
+    const syncMirrorStyle = () => {
+      const cs = getComputedStyle(bEl);
+      if (cs.font !== cachedFont || cs.lineHeight !== cachedLineH || cs.letterSpacing !== cachedLetterSp) {
+        cachedFont = cs.font;
+        cachedLineH = cs.lineHeight;
+        cachedLetterSp = cs.letterSpacing;
+        mirror.style.font = cachedFont;
+        mirror.style.lineHeight = cachedLineH;
+        mirror.style.letterSpacing = cachedLetterSp;
+      }
+      mirror.style.width = bEl.clientWidth + "px";
+    };
 
     /* ── Follow caret ── */
     const followCaret = (force = false) => {
@@ -98,22 +122,12 @@ export const NoteEditor = memo(function NoteEditor({
       if (atEnd) {
         caretBottom = bRect.top + bEl.offsetHeight;
       } else {
-        const text = bEl.value.substring(0, bEl.selectionEnd);
-        const cs = getComputedStyle(bEl);
-        const mirror = document.createElement("div");
-        mirror.style.cssText =
-          `position:absolute;visibility:hidden;pointer-events:none;white-space:pre-wrap;` +
-          `word-break:break-word;overflow-wrap:anywhere;width:${bEl.clientWidth}px;` +
-          `font:${cs.font};line-height:${cs.lineHeight};letter-spacing:${cs.letterSpacing};` +
-          `padding:0;border:none;`;
-        mirror.textContent = text + "\u200b";
-        document.body.appendChild(mirror);
+        syncMirrorStyle();
+        mirror.textContent = bEl.value.substring(0, bEl.selectionEnd) + "\u200b";
         caretBottom = bRect.top + mirror.offsetHeight;
-        document.body.removeChild(mirror);
       }
 
-      const cs = getComputedStyle(bEl);
-      const lineH = parseFloat(cs.lineHeight) || 25;
+      const lineH = parseFloat(cachedLineH || getComputedStyle(bEl).lineHeight) || 25;
       const caretTop = caretBottom - lineH;
 
       if (caretBottom > visibleBottom - margin) {
@@ -132,17 +146,29 @@ export const NoteEditor = memo(function NoteEditor({
 
     const onTitle = () => { tv.current = tEl.value; sched(); };
 
+    /* ── Resize textarea (single-frame resize + caret follow) ── */
     const onBody = () => {
+      const curLen = bEl.value.length;
+      const shrunk = curLen < prevLen;
+      prevLen = curLen;
+
       bv.current = bEl.value;
       if (!bEl.value) stick.current = true;
       sched();
+
       requestAnimationFrame(() => {
-        bEl.style.height = "auto";
+        // Only reset height when content shrinks; growing needs no reset
+        if (shrunk) {
+          bEl.style.height = "0";
+        }
         bEl.style.height = bEl.scrollHeight + "px";
+
         const isOverflowing = sEl.scrollHeight > sEl.clientHeight;
         const justOverflowed = !wasOverflowing && isOverflowing;
         wasOverflowing = isOverflowing;
-        requestAnimationFrame(() => followCaret(justOverflowed));
+
+        // Follow caret in the SAME frame (no second rAF)
+        followCaret(justOverflowed);
       });
     };
 
@@ -172,7 +198,7 @@ export const NoteEditor = memo(function NoteEditor({
     if (vv) vv.addEventListener("resize", schedFollow, { passive: true });
 
     requestAnimationFrame(() => {
-      bEl.style.height = "auto";
+      bEl.style.height = "0";
       bEl.style.height = bEl.scrollHeight + "px";
     });
 
@@ -182,6 +208,7 @@ export const NoteEditor = memo(function NoteEditor({
       alive.current = false;
       cancelAnimationFrame(followRaf);
       clearTimeout(scrollTimer);
+      if (mirror.parentNode) mirror.parentNode.removeChild(mirror);
       tEl.removeEventListener("input", onTitle);
       bEl.removeEventListener("input", onBody);
       bEl.removeEventListener("compositionend", schedFollow);
